@@ -42,9 +42,9 @@ type Point struct {
 	Y int
 }
 
-type FontGlyph [][]Cell
+type Glyph [][]Cell
 
-func (f FontGlyph) Draw(cg *ContributionGraph, start Point) error {
+func (f Glyph) Draw(cg *ContributionGraph, start Point) error {
 	if start.X > len(cg[0]) || start.X < 0 ||
 		start.Y > len(cg) || start.Y < 0 {
 		return ErrPointOutsideContributionGraph
@@ -62,10 +62,18 @@ func (f FontGlyph) Draw(cg *ContributionGraph, start Point) error {
 	return nil
 }
 
-type FontGlyphMapper map[byte]FontGlyph
+type GlyphMapper map[byte]Glyph
+
+func (font GlyphMapper) textToGlyphs(s string) []Glyph {
+	glyphs := make([]Glyph, len(s))
+	for i, chr := range s {
+		glyphs[i] = font[byte(unicode.ToUpper(chr))]
+	}
+	return glyphs
+}
 
 var (
-	font3x3Glyphs = FontGlyphMapper{
+	font3x3Glyphs = GlyphMapper{
 		'A': {
 			{EmptyCell, Occupied1, EmptyCell},
 			{Occupied1, Occupied1, Occupied1},
@@ -203,7 +211,7 @@ var (
 		},
 	}
 
-	font3x5Glyphs = FontGlyphMapper{
+	font3x5Glyphs = GlyphMapper{
 		'A': {
 			{EmptyCell, Occupied1, EmptyCell},
 			{Occupied1, EmptyCell, Occupied1},
@@ -396,17 +404,9 @@ var (
 	}
 )
 
-func textToGlyphs(s string, font FontGlyphMapper) []FontGlyph {
-	glyphs := make([]FontGlyph, len(s))
-	for i, chr := range s {
-		glyphs[i] = font[byte(unicode.ToUpper(chr))]
-	}
-	return glyphs
-}
-
 func main() {
 	cg := ContributionGraph{}
-	glyphs := textToGlyphs("Hello World", font3x5Glyphs)
+	glyphs := font3x3Glyphs.textToGlyphs("Hello World")
 	point := Point{1, 1}
 	for _, glyph := range glyphs {
 		err := glyph.Draw(&cg, point)
