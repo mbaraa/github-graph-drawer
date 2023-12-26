@@ -62,10 +62,24 @@ func (f Glyph) Draw(cg *ContributionGraph, start Point) error {
 	return nil
 }
 
+type GlyphSentence []Glyph
+
+func (g GlyphSentence) DrawSentence(cg *ContributionGraph) error {
+	point := Point{0, 0}
+	for _, glyph := range g {
+		err := glyph.Draw(cg, point)
+		if err != nil {
+			return err
+		}
+		point.X += len(glyph[0]) + 1
+	}
+	return nil
+}
+
 type GlyphMapper map[byte]Glyph
 
-func (font GlyphMapper) textToGlyphs(s string) []Glyph {
-	glyphs := make([]Glyph, len(s))
+func (font GlyphMapper) TextToGlyphs(s string) GlyphSentence {
+	glyphs := make(GlyphSentence, len(s))
 	for i, chr := range s {
 		glyphs[i] = font[byte(unicode.ToUpper(chr))]
 	}
@@ -406,15 +420,8 @@ var (
 
 func main() {
 	cg := ContributionGraph{}
-	glyphs := font3x3Glyphs.textToGlyphs("Hello World")
-	point := Point{1, 1}
-	for _, glyph := range glyphs {
-		err := glyph.Draw(&cg, point)
-		if err != nil {
-			fmt.Println(err)
-		}
-		point.X += len(glyph[0]) + 1
-	}
+
+	font3x5Glyphs.TextToGlyphs("Hello Niggaaa").DrawSentence(&cg)
 
 	for _, day := range cg {
 		for _, week := range day {
