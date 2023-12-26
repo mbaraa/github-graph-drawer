@@ -42,9 +42,9 @@ type Point struct {
 	Y int
 }
 
-type Font3x3Glyph [3][3]Cell
+type FontGlyph [][]Cell
 
-func (f Font3x3Glyph) Draw(cg *ContributionGraph, start Point) error {
+func (f FontGlyph) Draw(cg *ContributionGraph, start Point) error {
 	if start.X > len(cg[0]) || start.X < 0 ||
 		start.Y > len(cg) || start.Y < 0 {
 		return ErrPointOutsideContributionGraph
@@ -62,28 +62,10 @@ func (f Font3x3Glyph) Draw(cg *ContributionGraph, start Point) error {
 	return nil
 }
 
-type Font3x5Glyph [5][3]Cell
-
-func (f Font3x5Glyph) Draw(cg ContributionGraph, start Point) error {
-	if start.X > len(cg[0]) || start.X < 0 ||
-		start.Y > len(cg) || start.Y < 0 {
-		return ErrPointOutsideContributionGraph
-	}
-	if start.X+len(f[0]) > len(cg[0]) || start.Y+len(f) > len(cg) {
-		return ErrContributionGraphGlyphOverflow
-	}
-
-	for y := 0; y < len(f); y++ {
-		for x := 0; x < len(f[0]); x++ {
-			cg[start.Y+y][start.X+x] = f[y][x]
-		}
-	}
-
-	return nil
-}
+type FontGlyphMapper map[byte]FontGlyph
 
 var (
-	font3x3Glyphs = map[byte]Font3x3Glyph{
+	font3x3Glyphs = FontGlyphMapper{
 		'A': {
 			{EmptyCell, Occupied1, EmptyCell},
 			{Occupied1, Occupied1, Occupied1},
@@ -221,210 +203,217 @@ var (
 		},
 	}
 
-	font3x5Glyphs = map[byte]Font3x5Glyph{
+	font3x5Glyphs = FontGlyphMapper{
 		'A': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'B': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, EmptyCell},
 		},
 		'C': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, Occupied1},
 		},
 		'D': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, EmptyCell},
 		},
 		'E': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'F': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
 		},
 		'G': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'H': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'I': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'J': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, Occupied1},
+			{EmptyCell, EmptyCell, Occupied1},
+			{EmptyCell, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'K': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'L': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'M': {
 			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'N': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'O': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
 		},
 		'P': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
 		},
 		'Q': {
 			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{EmptyCell, EmptyCell, Occupied1},
 		},
 		'R': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'S': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, EmptyCell, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'T': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
 		},
 		'U': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'V': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
 		},
 		'W': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
+			{Occupied1, Occupied1, Occupied1},
 		},
 		'X': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
 		},
 		'Y': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, EmptyCell, Occupied1},
+			{Occupied1, EmptyCell, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
+			{EmptyCell, Occupied1, EmptyCell},
 		},
 		'Z': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
-			{EmptyCell, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+			{EmptyCell, EmptyCell, Occupied1},
+			{EmptyCell, Occupied1, EmptyCell},
+			{Occupied1, EmptyCell, EmptyCell},
+			{Occupied1, Occupied1, Occupied1},
+		},
+		' ': {
+			{EmptyCell},
+			{EmptyCell},
+			{EmptyCell},
+			{EmptyCell},
+			{EmptyCell},
 		},
 	}
 )
 
-func textToGlyphs(s string) []Font3x3Glyph {
-	glyphs := make([]Font3x3Glyph, len(s))
+func textToGlyphs(s string, font FontGlyphMapper) []FontGlyph {
+	glyphs := make([]FontGlyph, len(s))
 	for i, chr := range s {
-		glyphs[i] = font3x3Glyphs[byte(unicode.ToUpper(chr))]
+		glyphs[i] = font[byte(unicode.ToUpper(chr))]
 	}
 	return glyphs
 }
 
 func main() {
 	cg := ContributionGraph{}
-	glyphs := textToGlyphs("Hello World")
+	glyphs := textToGlyphs("Hello World", font3x5Glyphs)
 	point := Point{1, 1}
 	for _, glyph := range glyphs {
 		err := glyph.Draw(&cg, point)
 		if err != nil {
 			fmt.Println(err)
 		}
-		point.X += 4
+		point.X += len(glyph[0]) + 1
 	}
 
 	for _, day := range cg {
