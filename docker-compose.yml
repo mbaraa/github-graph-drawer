@@ -27,7 +27,7 @@ services:
     restart: "always"
     ports:
       - "9999:8080"
-    env_file: ./server/.env.docker
+    env_file: ./.env.docker
     stdin_open: true
 #networks:
 # - github-graph-drawer
