@@ -1,0 +1,19 @@
+name: rex-deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  rex-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: rex-7567-e27
+        uses: mbaraa/rex-action@v1.0
+        with:
+          server-url: ${{ secrets.REX_SERVER }}
+          token: ${{ secrets.REX_KEY }}
+          repo-name: github-graph-drawer
