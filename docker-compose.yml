@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  #  github-graph-drawer-db:
+  #    image: "mariadb:10.6"
+  #    container_name: "github-graph-drawer-db"
+  #    restart: "always"
+  #    environment:
+  #      MARIADB_ROOT_PASSWORD: "hellohellobonjourbonjour"
+  #      MARIADB_DATABASE: "github-graph-drawer"
+  #    ports:
+  #      - "3306"
+  #    volumes:
+  #      - db-config:/etc/mysql
+  #      - db-data:/var/lib/mysql
+  #    networks:
+  #      - github-graph-drawer
+
+  github-graph-drawer:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: "github-graph-drawer"
+    # depends_on:
+    # - github-graph-drawer-db
+    # restart: "unless-stopped"
+    restart: "always"
+    ports:
+      - "9999:8080"
+    env_file: ./server/.env.docker
+    stdin_open: true
+#networks:
+# - github-graph-drawer
+#
+#volumes:
+#  db-config:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: ./_database/etc/
+#  db-data:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: ./_database/var/
+#
+#networks:
+#  github-graph-drawer: {}
