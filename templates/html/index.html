@@ -24,27 +24,40 @@
       };
     </script>
   </head>
-  <body class="bg-nilCell">
+  <body style="background-color: #121212">
     <form
       class="m-1"
       hx-get="/contribution-graph"
       hx-swap="innerHTML"
       hx-target="#graph"
+      hx-trigger="keyup"
     >
       <input
         class="p-1 bg-[#343434] text-white w-72 rounded-md border border-[#121212]"
         type="text"
         name="msg"
-        placeholder="Enter your message here"
+        placeholder="Type to get htmx busy!"
+        autocomplete="off"
         maxlength="17"
       />
-      <input
+      <a
+        id="download-script"
+        download
         class="bg-[#efefef] rounded-md border border-[#121212] hover:bg-[#121212] hover:text-[#efefef] hover:border-[#efefef] cursor-pointer text-[#121212] p-1 font-bold"
-        type="submit"
-        value="Preview graph"
-      />
+      >
+        Download Script
+      </a>
     </form>
+
     <div id="graph"></div>
+    <script>
+      const downloadLink = document.getElementById("download-script");
+      document.getElementById("msg").addEventListener("keyup", (e) => {
+        const msg = e.target.value;
+        downloadLink.href = "/generate-script?msg=" + msg;
+        downloadLink.download = `Draw "${msg}" on github graph script.sh`;
+      });
+    </script>
   </body>
 </html>
 {{ end }}
