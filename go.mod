@@ -1,3 +1,3 @@
-module gh-graph-drawer
+module github-graph-drawer
 
-go 1.21.5
+go 1.21
