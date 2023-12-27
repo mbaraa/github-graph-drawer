@@ -211,8 +211,6 @@ func server() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
 
 		cg, err := getCGWithTextOnIt(msg[0])
 		if err != nil {
@@ -220,6 +218,8 @@ func server() {
 			return
 		}
 
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
 		if err := tt.ExecuteTemplate(w, "graph_preview", map[string]any{
 			"Cells": mapCellsToCSS(*cg),
 		}); err != nil {
@@ -237,7 +237,22 @@ func server() {
 		}
 	})
 
-	http.FileServer(http.FS(res))
+	http.HandleFunc("/generate-script", func(w http.ResponseWriter, r *http.Request) {
+		msg, exists := r.URL.Query()["msg"]
+		if !exists {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		scriptFile, err := generateScript(msg[0], time.Now().Year())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = io.Copy(w, scriptFile)
+	})
 
 	log.Println("server started...")
 	err := http.ListenAndServe(":8080", nil)
