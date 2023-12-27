@@ -1,14 +1,11 @@
 {{ define "graph_preview" }}
 <section class="bg-nilCell w-fit px-1">
   <!-- loop here -->
-  {{ range . }}
+  {{ range .Cells }}
   <div class="flex justify-between gap-x-[3px]">
     <!-- and here -->
     {{ range . }}
-    <div
-      class="bg-{{ .BG }} w-2.5 h-2.5 rounded-sm my-[1.5px]"
-      title="{{ .Date }}"
-    ></div>
+    <div class="bg-{{ . }} w-2.5 h-2.5 rounded-sm my-[1.5px]"></div>
     {{ end }}
   </div>
   {{ end }}

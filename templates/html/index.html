@@ -24,8 +24,27 @@
       };
     </script>
   </head>
-  <body>
-    {{ template "graph_preview" .Cells }}
+  <body class="bg-nilCell">
+    <form
+      class="m-1"
+      hx-get="/contribution-graph"
+      hx-swap="innerHTML"
+      hx-target="#graph"
+    >
+      <input
+        class="p-1 bg-[#343434] text-white w-72 rounded-md border border-[#121212]"
+        type="text"
+        name="msg"
+        placeholder="Enter your message here"
+        maxlength="17"
+      />
+      <input
+        class="bg-[#efefef] rounded-md border border-[#121212] hover:bg-[#121212] hover:text-[#efefef] hover:border-[#efefef] cursor-pointer text-[#121212] p-1 font-bold"
+        type="submit"
+        value="Preview graph"
+      />
+    </form>
+    <div id="graph"></div>
   </body>
 </html>
 {{ end }}

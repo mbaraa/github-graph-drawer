@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"os"
 	"slices"
 	"strings"
 	"text/template"
@@ -102,66 +103,6 @@ func (font GlyphMapper) TextToGlyphs(s string) GlyphSentence {
 	return glyphs
 }
 
-func main() {
-	// server()
-	script()
-}
-
-func script() {
-	sentence := font3x5Glyphs.TextToGlyphs("Hola Soy Baraa")
-	cg := ContributionGraph{}.New()
-	err := cg.DrawSentence(sentence, Point{0, 0})
-	if err != nil {
-		panic(err)
-	}
-
-	days := getContributionsForYear(2023)
-	for k, v := range days {
-		if k.X == 1 {
-			fmt.Println(k, v)
-		}
-	}
-	for _, day := range cg.Cells {
-		for _, weekDay := range day {
-			fmt.Print(weekDay)
-		}
-		fmt.Println()
-	}
-
-	gitDates := make([]string, 0)
-	for y, day := range cg.Cells {
-		for x, weekDay := range day {
-			if weekDay == NilCell || weekDay == EmptyCell {
-				continue
-			}
-			gitDates = append(gitDates, string(days[Point{x, y}]))
-		}
-	}
-
-	slices.Sort(gitDates)
-
-	fmt.Println(textFS.ReadDir("."))
-	textTemplates, err := template.ParseFS(textFS, "templates/text/generate-commits.sh")
-	if err != nil {
-		panic(err)
-	}
-
-	out, _ := os.Create("out.sh")
-	defer out.Close()
-	textTemplates.Execute(out, map[string]string{
-		"Dates": strings.Join(gitDates, " "),
-	})
-}
-
-var (
-	//go:embed templates/html
-	res embed.FS
-
-	pages = map[string]string{
-		"/": "templates/html/index.html",
-	}
-)
-
 var cellFiller = map[Cell]string{
 	NilCell:   "nilCell",
 	EmptyCell: "emptyCell",
@@ -210,23 +151,87 @@ func getContributionsForYear(year int) map[Point]GitDate {
 	return days
 }
 
+func getCGWithTextOnIt(text string) (*ContributionGraph, error) {
+	sentence := font3x5Glyphs.TextToGlyphs(text)
+	cg := ContributionGraph{}.New()
+	err := cg.DrawSentence(sentence, Point{0, 1})
+	if err != nil {
+		return nil, err
+	}
+	return cg, nil
+}
+
+func generateScript(msg string, year int) (outFile io.Reader, err error) {
+	sentence := font3x5Glyphs.TextToGlyphs(msg)
+	cg := ContributionGraph{}.New()
+	err = cg.DrawSentence(sentence, Point{0, 1})
+	if err != nil {
+		return
+	}
+	days := getContributionsForYear(year)
+	gitDates := make([]string, 0)
+	for y, day := range cg.Cells {
+		for x, weekDay := range day {
+			if weekDay == NilCell || weekDay == EmptyCell {
+				continue
+			}
+			gitDates = append(gitDates, string(days[Point{x, y}]))
+		}
+	}
+
+	slices.Sort(gitDates)
+
+	textTemplates, err := template.ParseFS(textFS, "templates/text/generate-commits.sh")
+	if err != nil {
+		return
+	}
+
+	file := bytes.NewBuffer([]byte{})
+	_ = textTemplates.Execute(file, map[string]string{
+		"Dates": strings.Join(gitDates, " "),
+	})
+
+	return file, nil
+}
+
+var (
+	//go:embed templates/html
+	res embed.FS
+
+	pages = map[string]string{
+		"/": "templates/html/index.html",
+	}
+)
+
 func server() {
 	tt := template.Must(template.ParseGlob("./templates/html/*"))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/contribution-graph", func(w http.ResponseWriter, r *http.Request) {
+		msg, exists := r.URL.Query()["msg"]
+		if !exists {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 
-		sentence := font3x5Glyphs.TextToGlyphs("Hola Soy Baraa")
-		cg := ContributionGraph{}.New()
-		err := cg.DrawSentence(sentence, Point{0, 0})
+		cg, err := getCGWithTextOnIt(msg[0])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if err := tt.ExecuteTemplate(w, "index", map[string]any{
+		if err := tt.ExecuteTemplate(w, "graph_preview", map[string]any{
 			"Cells": mapCellsToCSS(*cg),
 		}); err != nil {
+			fmt.Println(err)
+			return
+		}
+	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		if err := tt.ExecuteTemplate(w, "index", nil); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -235,8 +240,12 @@ func server() {
 	http.FileServer(http.FS(res))
 
 	log.Println("server started...")
-	err := http.ListenAndServe(":8088", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	server()
 }
