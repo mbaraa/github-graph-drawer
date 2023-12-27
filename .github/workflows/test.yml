@@ -18,6 +18,5 @@ jobs:
       - uses: actions/checkout@master
       - name: generate coverage
         run: |
-          cd server
           go mod tidy
           go test ./... -race -covermode=atomic

@@ -24,10 +24,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd server
           go mod tidy
 
       - name: Build
         run: |
-          cd server
           go build -v ./...
