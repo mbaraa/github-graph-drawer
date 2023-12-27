@@ -1,3 +1,4 @@
+{{ define "index" }}
 <!doctype html>
 <html lang="en">
   <head>
@@ -5,8 +6,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              nilCell: "#121212",
+              emptyCell: "#161b22",
+              occupied1: "#0e4429",
+              occupied2: "#006d32",
+              occupied3: "#26a641",
+              occupied4: "#39d353",
+            },
+          },
+        },
+      };
+    </script>
   </head>
   <body>
-    I draw
+    {{ template "graph_preview" .Cells }}
   </body>
 </html>
+{{ end }}
