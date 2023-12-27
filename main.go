@@ -7,7 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
+	"strings"
 	"text/template"
+	"time"
 	"unicode"
 )
 
@@ -35,46 +38,59 @@ const (
 	Occupied4
 )
 
-type ContributionGraph [7][52]Cell
+type ContributionGraph struct {
+	Cells [7][52]Cell
+}
+
+func (c ContributionGraph) New() *ContributionGraph {
+	for i := 0; i < len(c.Cells); i++ {
+		for j := 0; j < len(c.Cells[0]); j++ {
+			c.Cells[i][j] = EmptyCell
+		}
+	}
+	return &c
+}
 
 type Point struct {
 	X int
 	Y int
 }
 
-type Glyph [][]Cell
-
-func (f Glyph) Draw(cg *ContributionGraph, start Point) error {
-	if start.X > len(cg[0]) || start.X < 0 ||
-		start.Y > len(cg) || start.Y < 0 {
+func (c *ContributionGraph) DrawGlyph(g Glyph, start Point) error {
+	if start.X > len(c.Cells[0]) || start.X < 0 ||
+		start.Y > len(c.Cells) || start.Y < 0 {
 		return ErrPointOutsideContributionGraph
 	}
-	if start.X+len(f[0]) > len(cg[0]) || start.Y+len(f) > len(cg) {
+	if start.X+len(g[0]) > len(c.Cells[0]) || start.Y+len(g) > len(c.Cells) {
 		return ErrContributionGraphGlyphOverflow
 	}
 
-	for y := 0; y < len(f); y++ {
-		for x := 0; x < len(f[0]); x++ {
-			cg[start.Y+y][start.X+x] = f[y][x]
+	for y := 0; y < len(g); y++ {
+		for x := 0; x < len(g[0]); x++ {
+			c.Cells[start.Y+y][start.X+x] = g[y][x]
 		}
 	}
-
 	return nil
 }
 
-type GlyphSentence []Glyph
-
-func (g GlyphSentence) DrawSentence(cg *ContributionGraph) error {
-	point := Point{0, 0}
-	for _, glyph := range g {
-		err := glyph.Draw(cg, point)
+func (c *ContributionGraph) DrawSentence(gs GlyphSentence, start Point) error {
+	for _, glyph := range gs {
+		err := c.DrawGlyph(glyph, start)
 		if err != nil {
 			return err
 		}
-		point.X += len(glyph[0]) + 1
+		if len(glyph[0]) >= 3 {
+			start.X += len(glyph[0]) + 1
+		} else {
+			start.X += len(glyph[0])
+		}
 	}
 	return nil
 }
+
+type Glyph [][]Cell
+
+type GlyphSentence []Glyph
 
 type GlyphMapper map[byte]Glyph
 
@@ -86,355 +102,43 @@ func (font GlyphMapper) TextToGlyphs(s string) GlyphSentence {
 	return glyphs
 }
 
-var (
-	font3x3Glyphs = GlyphMapper{
-		'A': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'B': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'C': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'D': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-		},
-		'E': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'F': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-		},
-		'G': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'H': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'I': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'J': {
-			{EmptyCell, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'K': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'L': {
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'M': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'N': {
-			{EmptyCell, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-		},
-		'O': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'P': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-		},
-		'Q': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, Occupied1},
-		},
-		'R': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'S': {
-			{EmptyCell, Occupied1, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, EmptyCell},
-		},
-		'T': {
-			{Occupied1, Occupied1, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'U': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'V': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'W': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'X': {
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'Y': {
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'Z': {
-			{Occupied1, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, Occupied1},
-		},
-		' ': {
-			{EmptyCell},
-			{EmptyCell},
-			{EmptyCell},
-		},
-	}
-
-	font3x5Glyphs = GlyphMapper{
-		'A': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'B': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-		},
-		'C': {
-			{EmptyCell, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{EmptyCell, Occupied1, Occupied1},
-		},
-		'D': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-		},
-		'E': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'F': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-		},
-		'G': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'H': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'I': {
-			{Occupied1, Occupied1, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'J': {
-			{EmptyCell, Occupied1, Occupied1},
-			{EmptyCell, EmptyCell, Occupied1},
-			{EmptyCell, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'K': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'L': {
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'M': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'N': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'O': {
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'P': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-		},
-		'Q': {
-			{EmptyCell, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{EmptyCell, EmptyCell, Occupied1},
-		},
-		'R': {
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'S': {
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, EmptyCell, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'T': {
-			{Occupied1, Occupied1, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'U': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'V': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'W': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		'X': {
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, Occupied1},
-		},
-		'Y': {
-			{Occupied1, EmptyCell, Occupied1},
-			{Occupied1, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-			{EmptyCell, Occupied1, EmptyCell},
-		},
-		'Z': {
-			{Occupied1, Occupied1, Occupied1},
-			{EmptyCell, EmptyCell, Occupied1},
-			{EmptyCell, Occupied1, EmptyCell},
-			{Occupied1, EmptyCell, EmptyCell},
-			{Occupied1, Occupied1, Occupied1},
-		},
-		' ': {
-			{EmptyCell},
-			{EmptyCell},
-			{EmptyCell},
-			{EmptyCell},
-			{EmptyCell},
-		},
-	}
-)
-
 func main() {
-	cg := ContributionGraph{}
+	// server()
+	script()
+}
 
-	font3x5Glyphs.TextToGlyphs("Hello Niggaaa").DrawSentence(&cg)
+func script() {
+	sentence := font3x5Glyphs.TextToGlyphs("Hola Soy Baraa")
+	cg := ContributionGraph{}.New()
+	err := cg.DrawSentence(sentence, Point{0, 0})
+	if err != nil {
+		panic(err)
+	}
 
-	for _, day := range cg {
-		for _, week := range day {
-			if week != Occupied1 {
-				fmt.Print(" ")
-				continue
-			}
-			fmt.Print(week)
+	days := getContributionsForYear(2023)
+	for k, v := range days {
+		if k.X == 1 {
+			fmt.Println(k, v)
+		}
+	}
+	for _, day := range cg.Cells {
+		for _, weekDay := range day {
+			fmt.Print(weekDay)
 		}
 		fmt.Println()
 	}
 
-	return
+	gitDates := make([]string, 0)
+	for y, day := range cg.Cells {
+		for x, weekDay := range day {
+			if weekDay == NilCell || weekDay == EmptyCell {
+				continue
+			}
+			gitDates = append(gitDates, string(days[Point{x, y}]))
+		}
+	}
+
+	slices.Sort(gitDates)
 
 	fmt.Println(textFS.ReadDir("."))
 	textTemplates, err := template.ParseFS(textFS, "templates/text/generate-commits.sh")
@@ -445,7 +149,7 @@ func main() {
 	out, _ := os.Create("out.sh")
 	defer out.Close()
 	textTemplates.Execute(out, map[string]string{
-		"Dates": "1 2 2 3 4",
+		"Dates": strings.Join(gitDates, " "),
 	})
 }
 
@@ -458,26 +162,72 @@ var (
 	}
 )
 
-func main2() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		page, ok := pages[r.URL.Path]
-		if !ok {
-			w.WriteHeader(http.StatusNotFound)
-			return
+var cellFiller = map[Cell]string{
+	NilCell:   "nilCell",
+	EmptyCell: "emptyCell",
+	Occupied1: "occupied1",
+	Occupied2: "occupied2",
+	Occupied3: "occupied3",
+	Occupied4: "occupied4",
+}
+
+func mapCellsToCSS(cg ContributionGraph) [][]string {
+	classes := make([][]string, len(cg.Cells))
+	for i, row := range cg.Cells {
+		classes[i] = make([]string, len(row))
+		for j, cell := range row {
+			classes[i][j] = cellFiller[cell]
 		}
-		tpl, err := template.ParseFS(res, page)
+	}
+	return classes
+}
+
+type GitDate string
+
+func getContributionsForYear(year int) map[Point]GitDate {
+	yearTime := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	numDays := 365
+	if yearTime.Year()%4 == 0 && yearTime.Year()%100 != 0 {
+		numDays++
+	}
+
+	firstWeekdayOfYear := yearTime.Weekday()
+	weekdays := []time.Weekday{time.Sunday, time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday}
+	weekdayIndex := slices.Index(weekdays, firstWeekdayOfYear)
+
+	days := make(map[Point]GitDate)
+	point := Point{0, weekdayIndex}
+
+	for i := 0; i < numDays; i++ {
+		days[point] = GitDate(yearTime.Format("2006-01-02T15:04:05"))
+		yearTime = yearTime.Add(time.Hour*24 + time.Second)
+		if (i+1)%7 == 0 {
+			point.X++
+		}
+		point.Y = (point.Y + 1) % 7
+	}
+
+	return days
+}
+
+func server() {
+	tt := template.Must(template.ParseGlob("./templates/html/*"))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+
+		sentence := font3x5Glyphs.TextToGlyphs("Hola Soy Baraa")
+		cg := ContributionGraph{}.New()
+		err := cg.DrawSentence(sentence, Point{0, 0})
 		if err != nil {
-			log.Printf("page %s not found in pages cache...", r.RequestURI)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-		data := map[string]interface{}{
-			"userAgent": r.UserAgent(),
-		}
-		if err := tpl.Execute(w, data); err != nil {
+		if err := tt.ExecuteTemplate(w, "index", map[string]any{
+			"Cells": mapCellsToCSS(*cg),
+		}); err != nil {
+			fmt.Println(err)
 			return
 		}
 	})
