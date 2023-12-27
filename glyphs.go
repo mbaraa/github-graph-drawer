@@ -291,7 +291,7 @@ var (
 			{Occupied4, EmptyCell, Occupied4},
 			{Occupied4, EmptyCell, Occupied4},
 			{Occupied4, EmptyCell, Occupied4},
-			{EmptyCell, Occupied4, EmptyCell},
+			{Occupied4, EmptyCell, Occupied4},
 			{EmptyCell, Occupied4, EmptyCell},
 		},
 		'W': {
