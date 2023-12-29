@@ -1,10 +1,13 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github-graph-drawer/log"
+	"github-graph-drawer/utils/graphgen"
 )
 
 func main() {
@@ -16,6 +19,29 @@ func main() {
 			log.Errorln(err.Error())
 			return
 		}
+	})
+
+	http.HandleFunc("/contribution-graph", func(w http.ResponseWriter, r *http.Request) {
+		msg, exists := r.URL.Query()["msg"]
+		if !exists {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		gg := graphgen.NewContributionsGraphGenerator(
+			graphgen.HtmlGeneratorType,
+			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
+		)
+
+		buf, err := gg.GetFinalForm(msg[0])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Errorln(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = io.Copy(w, buf)
 	})
 
 	http.Handle("/resources/", http.FileServer(http.FS(res)))
