@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"io"
 	"net/http"
 	"text/template"
@@ -8,6 +9,11 @@ import (
 
 	"github-graph-drawer/log"
 	"github-graph-drawer/utils/graphgen"
+)
+
+var (
+	//go:embed resources/*
+	res embed.FS
 )
 
 func main() {
