@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"slices"
+	"strings"
+	ttemplate "text/template"
 )
 
 type ContributionsGraphGenerator interface {
@@ -91,5 +94,38 @@ func (c *CheatScriptContributionsGraphGenerator) SetFont(font Font) {
 }
 
 func (c *CheatScriptContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, error) {
-	panic("not implemented") // TODO: Implement
+	// get a usable sentence
+	sentence := c.font.TextToGlyphs(text)
+	err := c.cg.DrawSentence(sentence, Point{0, 1})
+	if err != nil {
+		return nil, err
+	}
+
+	gitDates := make([]string, 0)
+	for _, day := range c.cg.Cells() {
+		for _, weekDay := range day {
+			if weekDay.Type == NilCell || weekDay.Type == EmptyCell {
+				continue
+			}
+			gitDates = append(gitDates, string(weekDay.Date))
+		}
+	}
+	slices.Sort(gitDates)
+
+	// FIX:
+	// fix this illegal floating template instance.
+	tmpl := ttemplate.Must(ttemplate.ParseFiles("./templates/text/generate-commits.sh"))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	err = tmpl.ExecuteTemplate(buf, "generate_commits_script", map[string]string{
+		"Dates": strings.Join(gitDates, " "),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
 }
