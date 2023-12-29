@@ -1,0 +1,27 @@
+{{ define "header" }}
+<header
+  class="h-[60px] md:h-[80px] w-screen border-b border-b-[#EDEDED] px-[25px] md:px-[60px] py-[8px] md:py-[10px] flex justify-between"
+>
+  <a href="/" class="flex justify-center items-center">
+    <img
+      src="/resources/logo.png"
+      alt="Logo"
+      class="w-[50px] md:w-[65px] h-[50px] md:h-[65px]"
+    />
+    <h1 class="hidden md:block ms-[25px] text-[#EDEDED] text-[24px] font-bold">
+      GitHub Graph Drawer
+    </h1>
+  </a>
+  <div class="flex justify-center items-center">
+    <a
+      class="github-button"
+      href="https://github.com/mbaraa/github-graph-drawer"
+      data-color-scheme="no-preference: dark_dimmed; light: light; dark: dark;"
+      data-size="large"
+      data-show-count="true"
+      aria-label="Star mbaraa/github-graph-drawer on GitHub"
+      >Star</a
+    >
+  </div>
+</header>
+{{ end }}
