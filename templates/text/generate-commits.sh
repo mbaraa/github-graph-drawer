@@ -1,3 +1,4 @@
+{{ define "generate_commits_script" }}
 #!/bin/bash
 
 FILE_NAME=`uuidgen`.txt
@@ -12,3 +13,4 @@ for DATE in "${DATES[@]}"; do
         git commit -m "🤪 bump commit 😬" --date $DATE
     done
 done
+{{ end }}
