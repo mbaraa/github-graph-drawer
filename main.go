@@ -50,6 +50,30 @@ func main() {
 		_, _ = io.Copy(w, buf)
 	})
 
+	http.HandleFunc("/generate-script", func(w http.ResponseWriter, r *http.Request) {
+		msg, exists := r.URL.Query()["msg"]
+		if !exists {
+			log.Warningln("someone sent a bad request...")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		gg := graphgen.NewContributionsGraphGenerator(
+			graphgen.CheatScriptGeneratorType,
+			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
+		)
+
+		buf, err := gg.GetFinalForm(msg[0])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Errorln(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = io.Copy(w, buf)
+	})
+
 	http.Handle("/resources/", http.FileServer(http.FS(res)))
 
 	log.Infoln("server started...")
