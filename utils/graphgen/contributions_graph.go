@@ -39,17 +39,6 @@ func (c *ContributionsGraph) Cells() [7][53]Cell {
 }
 
 func (c ContributionsGraph) Init(year int) *ContributionsGraph {
-	for i := 0; i < len(c.cells); i++ {
-		for j := 0; j < len(c.cells[0]); j++ {
-			date := ""
-
-			c.cells[i][j] = Cell{
-				Type: NilCell,
-				Date: GitDate(date),
-			}
-		}
-	}
-
 	yearTime := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 	firstWeekdayOfYear := yearTime.Weekday()
 	weekdays := []time.Weekday{time.Sunday, time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday}
@@ -73,6 +62,7 @@ func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 			Type: cell,
 			Date: GitDate(yearTime.Format("2006-01-02T15:04:05")),
 		}
+		yearTime = yearTime.Add(time.Hour*24 + time.Second)
 		if (i+1)%7 == 0 {
 			x++
 		}
@@ -83,11 +73,24 @@ func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 }
 
 func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
+	firstWeekAvailable, lastWeekAvailable := true, true
+	for i := 0; i < len(c.cells); i++ {
+		if c.cells[i][0].Type == NilCell {
+			firstWeekAvailable = false
+		}
+		if c.cells[i][len(c.cells[0])-1].Type == NilCell {
+			lastWeekAvailable = false
+		}
+	}
+
 	if start.X > len(c.cells[0]) || start.X < 0 ||
 		start.Y > len(c.cells) || start.Y < 0 {
 		return ErrPointOutsideContributionGraph
 	}
-	if start.X+len(g[0]) > len(c.cells[0]) || start.Y+len(g) > len(c.cells) {
+	if (!firstWeekAvailable && start.X <= 0) ||
+		(!lastWeekAvailable && start.X+len(g[0]) >= len(c.cells[0])-1) ||
+		start.X+len(g[0]) > len(c.cells[0]) ||
+		start.Y+len(g) > len(c.cells) {
 		return ErrContributionGraphGlyphOverflow
 	}
 
