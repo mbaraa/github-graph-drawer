@@ -12,6 +12,7 @@ WORKDIR /app
 
 COPY --from=build /app/github-graph-drawer ./run
 COPY --from=build /app/templates ./templates
+COPY --from=build /app/resources ./resources
 
 EXPOSE 8080
 
