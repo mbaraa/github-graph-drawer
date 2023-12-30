@@ -34,10 +34,10 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		font, _ := r.URL.Query()["font"]
-		year, _ := r.URL.Query()["year"]
+		font := r.URL.Query().Get("font")
+		year := r.URL.Query().Get("year")
 		intYear := time.Now().Year()
-		if res, err := strconv.Atoi(year[0]); err == nil {
+		if res, err := strconv.Atoi(year); err == nil {
 			intYear = res
 		}
 
@@ -46,8 +46,9 @@ func main() {
 			graphgen.ContributionsGraph{}.Init(intYear),
 		)
 
-		switch font[0] {
+		switch font {
 		case "3x3":
+			gg.SetFont(graphgen.Font3x3)
 		case "3x5":
 			gg.SetFont(graphgen.Font3x5)
 		}
@@ -70,10 +71,10 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		font, _ := r.URL.Query()["font"]
-		year, _ := r.URL.Query()["year"]
+		font := r.URL.Query().Get("font")
+		year := r.URL.Query().Get("year")
 		intYear := time.Now().Year()
-		if res, err := strconv.Atoi(year[0]); err == nil {
+		if res, err := strconv.Atoi(year); err == nil {
 			intYear = res
 		}
 
@@ -91,8 +92,9 @@ func main() {
 			graphgen.ContributionsGraph{}.Init(intYear),
 		)
 
-		switch font[0] {
+		switch font {
 		case "3x3":
+			gg.SetFont(graphgen.Font3x3)
 		case "3x5":
 			gg.SetFont(graphgen.Font3x5)
 		}
