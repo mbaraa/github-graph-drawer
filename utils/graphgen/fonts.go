@@ -1,6 +1,7 @@
 package graphgen
 
 var (
+	// Font3x3 represents a 3x3 typeface.
 	Font3x3 = Font{
 		'A': {
 			{EmptyCell, OccupiedCell, EmptyCell},
@@ -189,6 +190,7 @@ var (
 		},
 	}
 
+	// Font3x5 represents a 3x5 typeface.
 	Font3x5 = Font{
 		'A': {
 			{EmptyCell, OccupiedCell, EmptyCell},
