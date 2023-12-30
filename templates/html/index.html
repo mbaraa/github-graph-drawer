@@ -46,43 +46,35 @@
     "
   >
     {{ template "header" }}
-    <!-- {{ template "action_button" .RedPillButton }} {{
-     template "action_button" .BluePillButton }} -->
 
-    <form
-      class="m-1"
-      hx-get="/contribution-graph"
-      hx-swap="innerHTML"
-      hx-target="#graph"
-      hx-trigger="keyup"
-    >
-      <input
-        class="p-1 bg-[#343434] text-white w-72 rounded-md border border-[#121212]"
-        type="text"
-        id="msg"
-        name="msg"
-        placeholder="Type to get htmx busy!"
-        autocomplete="off"
-        maxlength="17"
-      />
-      <a
-        id="download-script"
-        download
-        class="bg-[#efefef] rounded-md border border-[#121212] hover:bg-[#121212] hover:text-[#efefef] hover:border-[#efefef] cursor-pointer text-[#121212] p-1 font-bold"
-      >
-        Download Script
-      </a>
-    </form>
+    <div class="w-screen flex justify-center">
+      <div class="mt-[60px] md:mt-[30px]">
+        <h1
+          class="text-center text-[#EDEDED] text-[14px] md:text-[20px] font-medium mb-[15px] md:mb-[30px]"
+        >
+          Draw on you GitHub contributions graph
+        </h1>
 
+        <form
+          class="m-1"
+          hx-get="/contribution-graph"
+          hx-swap="innerHTML"
+          hx-target="#graph"
+          hx-trigger="keyup"
+        >
+          <input
+            class="p-[8px] md:p-[16px] bg-[#121212] text-white w-[330px] md:w-[600px] rounded-[5px] border-[3px] border-[#EDEDED]"
+            type="text"
+            id="msg"
+            name="msg"
+            placeholder="Type to generate a preview!"
+            autocomplete="off"
+            maxlength="15"
+          />
+        </form>
+      </div>
+    </div>
     <div id="graph"></div>
-    <script>
-      const downloadLink = document.getElementById("download-script");
-      document.getElementById("msg").addEventListener("keyup", (e) => {
-        const msg = e.target.value;
-        downloadLink.href = "/generate-script?msg=" + msg;
-        downloadLink.download = `Draw "${msg}" on github graph script.sh`;
-      });
-    </script>
   </body>
 </html>
 {{ end }}
