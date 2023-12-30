@@ -94,7 +94,7 @@ func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 // and returns an occuring error, on of:
 // - ErrContributionGraphGlyphOverflow
 // - ErrPointOutsideContributionGraph
-func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
+func (c *ContributionsGraph) DrawGlyph(g Glyph, start *Point) error {
 	firstWeekAvailable, lastWeekAvailable := true, true
 	for i := 0; i < len(c.cells); i++ {
 		if c.cells[i][0].Type == NilCell {
@@ -130,7 +130,7 @@ func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
 // and if the font is small enough it jumps to a new line drawing rest of the sentence.
 func (c *ContributionsGraph) DrawSentence(gs GlyphSentence, start Point) error {
 	for i, glyph := range gs {
-		err := c.DrawGlyph(glyph, start)
+		err := c.DrawGlyph(glyph, &start)
 		if err != nil {
 			return err
 		}
