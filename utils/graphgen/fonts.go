@@ -138,7 +138,7 @@ var (
 			{EmptyCell},
 		},
 		'1': {
-			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, EmptyCell},
 			{EmptyCell, OccupiedCell, EmptyCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
