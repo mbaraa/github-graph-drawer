@@ -1,14 +1,14 @@
 package graphgen
 
 var (
-	font3x3Glyphs = Font{
+	Font3x3 = Font{
 		'A': {
 			{EmptyCell, OccupiedCell, EmptyCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, EmptyCell, OccupiedCell},
 		},
 		'B': {
-			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, EmptyCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
@@ -34,7 +34,7 @@ var (
 		},
 		'G': {
 			{OccupiedCell, OccupiedCell, EmptyCell},
-			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
 		'H': {
@@ -43,9 +43,9 @@ var (
 			{OccupiedCell, EmptyCell, OccupiedCell},
 		},
 		'I': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{EmptyCell, OccupiedCell, EmptyCell},
-			{EmptyCell, OccupiedCell, EmptyCell},
-			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
 		'J': {
 			{EmptyCell, EmptyCell, OccupiedCell},
@@ -63,34 +63,34 @@ var (
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
 		'M': {
-			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, EmptyCell, OccupiedCell},
 		},
 		'N': {
-			{EmptyCell, EmptyCell, OccupiedCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
-			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
 		},
 		'O': {
-			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, EmptyCell, OccupiedCell},
-			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 		},
 		'P': {
-			{OccupiedCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
 			{OccupiedCell, EmptyCell, EmptyCell},
 		},
 		'Q': {
-			{EmptyCell, OccupiedCell, EmptyCell},
-			{OccupiedCell, EmptyCell, OccupiedCell},
-			{EmptyCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
 		},
 		'R': {
-			{OccupiedCell, OccupiedCell, EmptyCell},
 			{OccupiedCell, OccupiedCell, OccupiedCell},
-			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, EmptyCell, EmptyCell},
 		},
 		'S': {
 			{EmptyCell, OccupiedCell, OccupiedCell},
@@ -137,9 +137,59 @@ var (
 			{EmptyCell},
 			{EmptyCell},
 		},
+		'1': {
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'2': {
+			{OccupiedCell, OccupiedCell, EmptyCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{EmptyCell, OccupiedCell, OccupiedCell},
+		},
+		'3': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'4': {
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'5': {
+			{EmptyCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, EmptyCell},
+		},
+		'6': {
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'7': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'8': {
+			{EmptyCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'9': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'0': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
 	}
 
-	font3x5Glyphs = Font{
+	Font3x5 = Font{
 		'A': {
 			{EmptyCell, OccupiedCell, EmptyCell},
 			{OccupiedCell, EmptyCell, OccupiedCell},
@@ -328,6 +378,76 @@ var (
 			{EmptyCell},
 			{EmptyCell},
 			{EmptyCell},
+		},
+		'1': {
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, EmptyCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'2': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'3': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'4': {
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'5': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'6': {
+			{OccupiedCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, EmptyCell, EmptyCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+		},
+		'7': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'8': {
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
+		},
+		'9': {
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, OccupiedCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+			{EmptyCell, EmptyCell, OccupiedCell},
+		},
+		'0': {
+			{EmptyCell, OccupiedCell, EmptyCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{OccupiedCell, EmptyCell, OccupiedCell},
+			{EmptyCell, OccupiedCell, EmptyCell},
 		},
 	}
 )
