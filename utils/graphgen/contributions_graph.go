@@ -103,15 +103,24 @@ func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
 }
 
 func (c *ContributionsGraph) DrawSentence(gs GlyphSentence, start Point) error {
-	for _, glyph := range gs {
+	for i, glyph := range gs {
 		err := c.DrawGlyph(glyph, start)
 		if err != nil {
 			return err
 		}
+		// HACK:
+		// handle whitespace to not take more than what it needs.
 		if len(glyph[0]) >= 3 {
 			start.X += len(glyph[0]) + 1
 		} else {
 			start.X += len(glyph[0])
+		}
+
+		// move writing cursor a line down.
+		if i <= len(gs)-2 &&
+			start.X+len(gs[i+1][0]) >= len(c.cells[0])-1 {
+			start.Y += len(glyph) + 1
+			start.X = 0
 		}
 	}
 	return nil
