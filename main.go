@@ -58,6 +58,15 @@ func main() {
 			return
 		}
 
+		// TODO: add zis to ze generator interface
+		commitCount, exists := r.URL.Query()["commit-count"]
+		if !exists {
+			log.Warningln("someone sent a bad request...")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_ = commitCount
+
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.CheatScriptGeneratorType,
 			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
@@ -72,6 +81,37 @@ func main() {
 
 		w.Header().Set("Content-Type", "text/plain")
 		_, _ = io.Copy(w, buf)
+	})
+
+	http.HandleFunc("/schedule-emails", func(w http.ResponseWriter, r *http.Request) {
+		msg, exists := r.URL.Query()["msg"]
+		if !exists {
+			log.Warningln("someone sent a bad request...")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_ = msg
+
+		// TODO: add zis to ze generator interface
+		commitCount, exists := r.URL.Query()["commit-count"]
+		if !exists {
+			log.Warningln("someone sent a bad request...")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_ = commitCount
+
+		email, exists := r.URL.Query()["email"]
+		if !exists {
+			log.Warningln("someone sent a bad request...")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_ = email
+		log.Info("email: ", email)
+
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte("<span style=\"color: white;\">NOT IMPLEMENTED :)</span>"))
 	})
 
 	http.Handle("/resources/", http.FileServer(http.FS(res)))
