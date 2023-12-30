@@ -7,37 +7,55 @@ import (
 )
 
 type (
-	GitDate       string
-	CellType      int
-	Glyph         [][]CellType
+	// GitDate represents a git date used in `git commit --date`
+	GitDate string
+	// CellType represents a cell's filler.
+	CellType int
+	// Glyph is how a character is shown on the contributions graph.
+	Glyph [][]CellType
+	// GlyphSentence well, it's the string of glyphs.
 	GlyphSentence []Glyph
-	Font          map[byte]Glyph
+	// Font the byte to glyph mapper.
+	Font map[byte]Glyph
 )
 
 const (
+	// NilCell represents a cell that's outside of the selected year.
 	NilCell CellType = iota
+	// EmptyCell represents a cell that's inside of the selected year,
+	// but has no contributions in it.
 	EmptyCell
+	// OccupiedCell represents a cells that's inside of the selected year,
+	// and has some juicy contributions in it.
 	OccupiedCell
 )
 
+// Cell is the single element in the contributions graph's grid,
+// where it contains the cell's filler and the associated git date.
 type Cell struct {
 	Type CellType
 	Date GitDate
 }
 
+// Point is a 2D point.
 type Point struct {
 	X int
 	Y int
 }
 
+// ContributionsGraph is a representational state of the contributions graph.
 type ContributionsGraph struct {
 	cells [7][53]Cell
 }
 
+// Cells returns the contributions graph's cells.
 func (c *ContributionsGraph) Cells() [7][53]Cell {
 	return c.cells
 }
 
+// Init initializes the contributions graph's cells for the given year,
+// with empty cells, and nil cells for cells outside the given year,
+// and sets each cell's corresponding git date.
 func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 	yearTime := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 	firstWeekdayOfYear := yearTime.Weekday()
@@ -72,6 +90,10 @@ func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 	return &c
 }
 
+// DrawGlyph draws the given glyps onto the contributions graph.
+// and returns an occuring error, on of:
+// - ErrContributionGraphGlyphOverflow
+// - ErrPointOutsideContributionGraph
 func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
 	firstWeekAvailable, lastWeekAvailable := true, true
 	for i := 0; i < len(c.cells); i++ {
@@ -104,6 +126,8 @@ func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
 	return nil
 }
 
+// DrawSentence calls DrawGlyph to draw a complete sentence on the contributions graph,
+// and if the font is small enough it jumps to a new line drawing rest of the sentence.
 func (c *ContributionsGraph) DrawSentence(gs GlyphSentence, start Point) error {
 	for i, glyph := range gs {
 		err := c.DrawGlyph(glyph, start)
@@ -128,6 +152,8 @@ func (c *ContributionsGraph) DrawSentence(gs GlyphSentence, start Point) error {
 	return nil
 }
 
+// Reset sets each occupied cell to empty cell,
+// allowing the contributions graph to be used more than one time.
 func (c *ContributionsGraph) Reset() {
 	for y := 0; y < len(c.cells); y++ {
 		for x := 0; x < len(c.cells[0]); x++ {
@@ -138,6 +164,7 @@ func (c *ContributionsGraph) Reset() {
 	}
 }
 
+// TextToGlyphs converts the given string to a drawable glyph sentence.
 func (font Font) TextToGlyphs(s string) GlyphSentence {
 	glyphs := make(GlyphSentence, 0)
 	for i := 0; i < len(s); i++ {
