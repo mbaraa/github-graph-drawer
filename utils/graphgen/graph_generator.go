@@ -26,7 +26,7 @@ func NewContributionsGraphGenerator(t GeneratorType, cg *ContributionsGraph) Con
 	case HtmlGeneratorType:
 		return &HtmlContributionsGraphGenerator{
 			cg:   cg,
-			font: font3x5Glyphs,
+			font: Font3x5,
 			cellFiller: map[CellType]string{
 				NilCell:      "nilCell",
 				EmptyCell:    "emptyCell",
@@ -36,7 +36,7 @@ func NewContributionsGraphGenerator(t GeneratorType, cg *ContributionsGraph) Con
 	case CheatScriptGeneratorType:
 		return &CheatScriptContributionsGraphGenerator{
 			cg:   cg,
-			font: font3x5Glyphs,
+			font: Font3x5,
 		}
 	default:
 		return nil
