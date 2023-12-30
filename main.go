@@ -33,11 +33,18 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		font, _ := r.URL.Query()["font"]
 
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.HtmlGeneratorType,
 			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
 		)
+
+		switch font[0] {
+		case "3x3":
+		case "3x5":
+			gg.SetFont(graphgen.Font3x5)
+		}
 
 		buf, err := gg.GetFinalForm(msg[0])
 		if err != nil {
@@ -57,6 +64,7 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		font, _ := r.URL.Query()["font"]
 
 		// TODO: add zis to ze generator interface
 		commitCount, exists := r.URL.Query()["commit-count"]
@@ -71,6 +79,12 @@ func main() {
 			graphgen.CheatScriptGeneratorType,
 			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
 		)
+
+		switch font[0] {
+		case "3x3":
+		case "3x5":
+			gg.SetFont(graphgen.Font3x5)
+		}
 
 		buf, err := gg.GetFinalForm(msg[0])
 		if err != nil {
