@@ -87,11 +87,13 @@ func (c *ContributionsGraph) DrawGlyph(g Glyph, start Point) error {
 		start.Y > len(c.cells) || start.Y < 0 {
 		return ErrPointOutsideContributionGraph
 	}
-	if (!firstWeekAvailable && start.X <= 0) ||
-		(!lastWeekAvailable && start.X+len(g[0]) >= len(c.cells[0])-1) ||
+	if (!lastWeekAvailable && start.X+len(g[0]) >= len(c.cells[0])-1) ||
 		start.X+len(g[0]) > len(c.cells[0]) ||
 		start.Y+len(g) > len(c.cells) {
 		return ErrContributionGraphGlyphOverflow
+	}
+	if !firstWeekAvailable && start.X <= 0 {
+		start.X++
 	}
 
 	for y := 0; y < len(g); y++ {
