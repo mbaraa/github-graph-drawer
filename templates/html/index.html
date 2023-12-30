@@ -60,17 +60,31 @@
           hx-get="/contribution-graph"
           hx-swap="innerHTML"
           hx-target="#graph"
-          hx-trigger="keyup"
+          hx-trigger="keyup,changed"
         >
-          <input
-            class="p-[8px] md:p-[16px] bg-[#121212] text-white w-[330px] md:w-[600px] rounded-[5px] border-[3px] border-[#EDEDED]"
-            type="text"
-            id="msg"
-            name="msg"
-            placeholder="Type to generate a preview!"
-            autocomplete="off"
-            maxlength="15"
-          />
+          <div
+            class="grid grid-cols-1 place-items-center content-center gap-y-[10px]"
+          >
+            <input
+              class="p-[8px] md:p-[16px] bg-[#121212] text-white w-[330px] md:w-[600px] rounded-[5px] border-[3px] border-[#EDEDED]"
+              type="text"
+              id="msg"
+              name="msg"
+              placeholder="Type to generate a preview!"
+              autocomplete="off"
+              maxlength="69"
+            />
+
+            <select
+              name="font"
+              id="font"
+              class="p-[8px] md:p-[10px] w-[150px] rounded-[5px]"
+            >
+              <option selected disabled>Choose Font</option>
+              <option value="3x5">Single Line (more readable)</option>
+              <option value="3x3">Two Lines (less readable)</option>
+            </select>
+          </div>
         </form>
       </div>
     </div>
