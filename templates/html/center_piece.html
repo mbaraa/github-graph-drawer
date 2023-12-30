@@ -1,0 +1,56 @@
+{{ define "center_piece" }}
+<section class="flex justify-center mt-[25px]">
+  <div>
+    {{ template "graph_preview" .Cells }}
+
+    <h2
+      class="text-center text-[#EDEDED] text-[16px] font-regular m-[10px] md:m-[20px]"
+    >
+      Choose your destiny...
+    </h2>
+
+    <div class="w-full flex justify-center">
+      <div class="grid grid-cols-1 md:grid-cols-3">
+        <form
+          class="w-[250px]"
+          hx-get="/schedule-emails?msg={{ .Msg }}&commit-count={{ .CommitCount }}"
+          hx-include="[name='email']"
+          hx-trigger="submit"
+        >
+          <input
+            type="submit"
+            class="w-full bg-[#FF1744] rounded-[25px] border border-[#EDEDED] hover:bg-[#EDEDED] hover:text-[#FF1744] hover:border-[#FF1744] cursor-pointer text-[#EDEDED] hover:text-[#FF1744] py-[10px] px-[20px] font-bold"
+            value="Email me daily"
+          />
+          <input
+            class="block mt-[20px] p-[5px] bg-[#121212] text-white w-full rounded-[5px] border-[3px] border-[#EDEDED]"
+            type="email"
+            name="email"
+            required
+            placeholder="Enter your email"
+          />
+        </form>
+
+        <span
+          class="text-[16px] text-[#EDEDED] text-center italic font-medium my-[20px] md:my-[14px] px-[20px]"
+          >OR</span
+        >
+
+        <div class="w-[250px]">
+          <a
+            class="w-full"
+            download="Draw {{ .Msg }} on github graph script.sh"
+            href="/generate-script?msg={{ .Msg }}&commit-count={{ .CommitCount }}"
+          >
+            <button
+              class="w-full bg-[#2979FF] rounded-[25px] border border-[#EDEDED] hover:bg-[#EDEDED] hover:text-[#2979FF] hover:border-[#2979FF] cursor-pointer text-[#EDEDED] hover:text-[#2979FF] py-[10px] px-[20px] font-bold"
+            >
+              Download Script
+            </button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
