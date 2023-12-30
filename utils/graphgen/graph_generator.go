@@ -56,7 +56,9 @@ func (h *HtmlContributionsGraphGenerator) SetFont(font Font) {
 func (h *HtmlContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, error) {
 	// get a usable sentence
 	sentence := h.font.TextToGlyphs(text)
-	err := h.cg.DrawSentence(sentence, Point{0, 1})
+	// TODO:
+	// handle different fonts' sizes.
+	err := h.cg.DrawSentence(sentence, Point{0, 0})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +99,9 @@ func (c *CheatScriptContributionsGraphGenerator) SetFont(font Font) {
 func (c *CheatScriptContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, error) {
 	// get a usable sentence
 	sentence := c.font.TextToGlyphs(text)
-	err := c.cg.DrawSentence(sentence, Point{0, 1})
+	// TODO:
+	// handle different fonts' sizes.
+	err := c.cg.DrawSentence(sentence, Point{0, 0})
 	if err != nil {
 		return nil, err
 	}
