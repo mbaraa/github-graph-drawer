@@ -72,10 +72,11 @@ func (h *HtmlContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, 
 
 	// FIX:
 	// fix this illegal floating template instance.
-	tmpl := template.Must(template.ParseFiles("./templates/html/graph_preview.html"))
+	tmpl := template.Must(template.ParseGlob("./templates/html/*"))
 	buf := bytes.NewBuffer([]byte{})
-	err = tmpl.ExecuteTemplate(buf, "graph_preview", map[string]any{
+	err = tmpl.ExecuteTemplate(buf, "center_piece", map[string]any{
 		"Cells": classes,
+		"Msg":   text,
 	})
 	if err != nil {
 		return nil, err
