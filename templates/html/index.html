@@ -75,15 +75,27 @@
               maxlength="69"
             />
 
-            <select
-              name="font"
-              id="font"
-              class="p-[8px] md:p-[10px] w-[150px] rounded-[5px]"
-            >
-              <option selected disabled>Choose Font</option>
-              <option value="3x5">Single Line (more readable)</option>
-              <option value="3x3">Two Lines (less readable)</option>
-            </select>
+            <div class="flex gap-x-[20px]">
+              <select
+                name="font"
+                id="font"
+                class="p-[8px] md:p-[10px] w-[150px] rounded-[5px]"
+              >
+                <option selected disabled>Choose Font</option>
+                <option value="3x5">Single Line (more readable)</option>
+                <option value="3x3">Two Lines (less readable)</option>
+              </select>
+
+              <input
+                class="p-[5px] bg-[#121212] text-white w-[150px] rounded-[5px] border-[3px] border-[#EDEDED]"
+                type="number"
+                min="1973"
+                max="2100"
+                name="year"
+                placeholder="Commit year"
+                maxlength="4"
+              />
+            </div>
           </div>
         </form>
       </div>
