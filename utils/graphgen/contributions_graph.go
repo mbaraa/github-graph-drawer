@@ -137,9 +137,13 @@ func (c *ContributionsGraph) Reset() {
 }
 
 func (font Font) TextToGlyphs(s string) GlyphSentence {
-	glyphs := make(GlyphSentence, len(s))
-	for i, chr := range s {
-		glyphs[i] = font[byte(unicode.ToUpper(chr))]
+	glyphs := make(GlyphSentence, 0)
+	for i := 0; i < len(s); i++ {
+		glyph, exists := font[byte(unicode.ToUpper(rune(s[i])))]
+		if !exists {
+			continue
+		}
+		glyphs = append(glyphs, glyph)
 	}
 	return glyphs
 }
