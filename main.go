@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io"
 	"net/http"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -34,10 +35,15 @@ func main() {
 			return
 		}
 		font, _ := r.URL.Query()["font"]
+		year, _ := r.URL.Query()["year"]
+		intYear := time.Now().Year()
+		if res, err := strconv.Atoi(year[0]); err == nil {
+			intYear = res
+		}
 
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.HtmlGeneratorType,
-			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
+			graphgen.ContributionsGraph{}.Init(intYear),
 		)
 
 		switch font[0] {
@@ -65,6 +71,11 @@ func main() {
 			return
 		}
 		font, _ := r.URL.Query()["font"]
+		year, _ := r.URL.Query()["year"]
+		intYear := time.Now().Year()
+		if res, err := strconv.Atoi(year[0]); err == nil {
+			intYear = res
+		}
 
 		// TODO: add zis to ze generator interface
 		commitCount, exists := r.URL.Query()["commit-count"]
@@ -77,7 +88,7 @@ func main() {
 
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.CheatScriptGeneratorType,
-			graphgen.ContributionsGraph{}.Init(time.Now().Year()),
+			graphgen.ContributionsGraph{}.Init(intYear),
 		)
 
 		switch font[0] {
