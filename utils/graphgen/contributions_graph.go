@@ -91,7 +91,7 @@ func (c ContributionsGraph) Init(year int) *ContributionsGraph {
 }
 
 // DrawGlyph draws the given glyps onto the contributions graph.
-// and returns an occuring error, on of:
+// and returns an occurring error, on of:
 // - ErrContributionGraphGlyphOverflow
 // - ErrPointOutsideContributionGraph
 func (c *ContributionsGraph) DrawGlyph(g Glyph, start *Point) error {

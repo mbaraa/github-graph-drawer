@@ -9,7 +9,7 @@ const (
 	InfoLevel logLevel = "\033[32m[INFO]\033[0m"
 	// WarningLevel means things are getting heavier.
 	WarningLevel logLevel = "\033[33m[WARNING]\033[0m"
-	// ErrorLevel means that something really bad happend.
+	// ErrorLevel means that something really bad happened.
 	ErrorLevel logLevel = "\033[31m[ERROR]\033[0m"
 )
 

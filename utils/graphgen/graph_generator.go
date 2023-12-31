@@ -17,7 +17,7 @@ type ContributionsGraphGenerator interface {
 	// - Font3x5; holds 3x5 glyphs.
 	SetFont(gm Font)
 	// GetFinalForm receives a string, and returns an io.Reader, with the resulting graph,
-	// and an occuring errpr,
+	// and an occurring errpr,
 	// the reason behind using io.Reader, is that the output is 99.9% of time is a file,
 	// for now the current implementations are files, so returning an io.Reader, makes more sense
 	// than a string, which will be converted to an io.Reader, or os.File, so this saves conversion time,
