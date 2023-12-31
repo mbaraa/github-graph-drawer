@@ -9,11 +9,11 @@
       Choose your destiny...
     </h2>
 
-    <div class="w-full flex justify-center">
+    <div class="w-full flex justify-center mt-[20px]">
       <div class="grid grid-cols-1 md:grid-cols-3">
         <form
           class="w-[250px]"
-          hx-get="/schedule-emails?msg={{ .Msg }}&commit-count={{ .CommitCount }}"
+          hx-get="/schedule-emails?msg={{ .Msg }}"
           hx-include="[name='email']"
           hx-trigger="submit"
         >
@@ -48,6 +48,13 @@
               Download Script
             </button>
           </a>
+          <div class="mt-[20px]">
+            <span
+              class="text-[16px] italic text-[#EDEDED] text-center font-medium"
+              >Run this script on a fresh repository to see your text on the
+              contributions graph.</span
+            >
+          </div>
         </div>
       </div>
     </div>
