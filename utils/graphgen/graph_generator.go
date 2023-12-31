@@ -22,7 +22,7 @@ type ContributionsGraphGenerator interface {
 	// for now the current implementations are files, so returning an io.Reader, makes more sense
 	// than a string, which will be converted to an io.Reader, or os.File, so this saves conversion time,
 	// and it looks a lot more neater.
-	GetFinalForm(text string) (io.Reader, error)
+	GetFinalForm(text string, commitsCount int) (io.Reader, error)
 }
 
 // GeneratorType is a selector between the current implementations of ContributionsGraphGenerator,
@@ -70,7 +70,7 @@ func (h *htmlContributionsGraphGenerator) SetFont(font Font) {
 	h.font = font
 }
 
-func (h *htmlContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, error) {
+func (h *htmlContributionsGraphGenerator) GetFinalForm(text string, commitsCount int) (io.Reader, error) {
 	// get a usable sentence
 	sentence := h.font.TextToGlyphs(text)
 	// TODO:
@@ -94,8 +94,9 @@ func (h *htmlContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, 
 	tmpl := template.Must(template.ParseGlob("./templates/html/*"))
 	buf := bytes.NewBuffer([]byte{})
 	err = tmpl.ExecuteTemplate(buf, "center_piece", map[string]any{
-		"Cells": classes,
-		"Msg":   text,
+		"Cells":        classes,
+		"Msg":          text,
+		"CommitsCount": commitsCount,
 	})
 	if err != nil {
 		return nil, err
@@ -113,7 +114,7 @@ func (c *cheatScriptContributionsGraphGenerator) SetFont(font Font) {
 	c.font = font
 }
 
-func (c *cheatScriptContributionsGraphGenerator) GetFinalForm(text string) (io.Reader, error) {
+func (c *cheatScriptContributionsGraphGenerator) GetFinalForm(text string, commitsCount int) (io.Reader, error) {
 	// get a usable sentence
 	sentence := c.font.TextToGlyphs(text)
 	// TODO:
@@ -142,8 +143,9 @@ func (c *cheatScriptContributionsGraphGenerator) GetFinalForm(text string) (io.R
 	}
 
 	buf := bytes.NewBuffer([]byte{})
-	err = tmpl.ExecuteTemplate(buf, "generate_commits_script", map[string]string{
-		"Dates": strings.Join(gitDates, " "),
+	err = tmpl.ExecuteTemplate(buf, "generate_commits_script", map[string]any{
+		"Dates":        strings.Join(gitDates, " "),
+		"CommitsCount": commitsCount,
 	})
 	if err != nil {
 		return nil, err

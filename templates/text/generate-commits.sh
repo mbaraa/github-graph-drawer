@@ -2,7 +2,7 @@
 #!/bin/bash
 
 FILE_NAME=`uuidgen`.txt
-MAX_COMMIT_COUNT=100
+MAX_COMMIT_COUNT={{ .CommitsCount }}
 DATES=( {{ .Dates }} )
 
 touch $FILE_NAME

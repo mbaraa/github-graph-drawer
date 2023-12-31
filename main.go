@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"time"
 
+	"github-graph-drawer/db"
 	"github-graph-drawer/log"
 	"github-graph-drawer/utils/graphgen"
 )
@@ -18,6 +19,7 @@ var (
 )
 
 func main() {
+	_ = db.EmailMsg{}
 	templates := template.Must(template.ParseGlob("./templates/html/*"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/robots.txt" {
@@ -36,19 +38,23 @@ func main() {
 	http.HandleFunc("/contribution-graph", func(w http.ResponseWriter, r *http.Request) {
 		msg, exists := r.URL.Query()["msg"]
 		if !exists {
+			log.Warningln("someone sent a bad request...")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		font := r.URL.Query().Get("font")
-		year := r.URL.Query().Get("year")
-		intYear := time.Now().Year()
-		if res, err := strconv.Atoi(year); err == nil {
-			intYear = res
+		year := time.Now().Year()
+		if parsedYear, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
+			year = parsedYear
+		}
+		commitsCount := 80
+		if parsedCommitsCount, err := strconv.Atoi(r.URL.Query().Get("commits-count")); err == nil {
+			commitsCount = parsedCommitsCount
 		}
 
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.HtmlGeneratorType,
-			graphgen.ContributionsGraph{}.Init(intYear),
+			graphgen.ContributionsGraph{}.Init(year),
 		)
 
 		switch font {
@@ -58,7 +64,7 @@ func main() {
 			gg.SetFont(graphgen.Font3x5)
 		}
 
-		buf, err := gg.GetFinalForm(msg[0])
+		buf, err := gg.GetFinalForm(msg[0], commitsCount)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Errorln(err.Error())
@@ -77,24 +83,18 @@ func main() {
 			return
 		}
 		font := r.URL.Query().Get("font")
-		year := r.URL.Query().Get("year")
-		intYear := time.Now().Year()
-		if res, err := strconv.Atoi(year); err == nil {
-			intYear = res
+		year := time.Now().Year()
+		if parsedYear, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
+			year = parsedYear
 		}
-
-		// TODO: add zis to ze generator interface
-		commitCount, exists := r.URL.Query()["commit-count"]
-		if !exists {
-			log.Warningln("someone sent a bad request...")
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		commitsCount := 80
+		if parsedCommitsCount, err := strconv.Atoi(r.URL.Query().Get("commits-count")); err == nil {
+			commitsCount = parsedCommitsCount
 		}
-		_ = commitCount
 
 		gg := graphgen.NewContributionsGraphGenerator(
 			graphgen.CheatScriptGeneratorType,
-			graphgen.ContributionsGraph{}.Init(intYear),
+			graphgen.ContributionsGraph{}.Init(year),
 		)
 
 		switch font {
@@ -104,7 +104,7 @@ func main() {
 			gg.SetFont(graphgen.Font3x5)
 		}
 
-		buf, err := gg.GetFinalForm(msg[0])
+		buf, err := gg.GetFinalForm(msg[0], commitsCount)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Errorln(err.Error())
