@@ -1,13 +1,17 @@
 package main
 
 import (
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"text/template"
 	"time"
 
+	"github-graph-drawer/config"
 	"github-graph-drawer/db"
 	"github-graph-drawer/log"
 	"github-graph-drawer/utils/graphgen"
@@ -18,8 +22,14 @@ var (
 	res embed.FS
 )
 
+func foo() {
+	sha256 := sha256.New()
+	sha256.Write([]byte(time.Now().String()))
+	fmt.Println(hex.EncodeToString(sha256.Sum(nil)))
+}
+
 func main() {
-	_ = db.EmailMsg{}
+	_ = db.EmailRequest{}
 	templates := template.Must(template.ParseGlob("./templates/html/*"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/robots.txt" {
@@ -122,16 +132,15 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_ = msg
-
-		// TODO: add zis to ze generator interface
-		commitCount, exists := r.URL.Query()["commit-count"]
-		if !exists {
-			log.Warningln("someone sent a bad request...")
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		font := r.URL.Query().Get("font")
+		year := time.Now().Year()
+		if parsedYear, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
+			year = parsedYear
 		}
-		_ = commitCount
+		commitsCount := 80
+		if parsedCommitsCount, err := strconv.Atoi(r.URL.Query().Get("commits-count")); err == nil {
+			commitsCount = parsedCommitsCount
+		}
 
 		email, exists := r.URL.Query()["email"]
 		if !exists {
@@ -139,15 +148,35 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_ = email
-		log.Info("email: ", email)
+
+		gg := graphgen.NewContributionsGraphGenerator(
+			graphgen.EmailScheduleGeneratorType,
+			graphgen.ContributionsGraph{}.Init(year),
+		)
+
+		switch font {
+		case "3x3":
+			gg.SetFont(graphgen.Font3x3)
+		case "3x5":
+			gg.SetFont(graphgen.Font3x5)
+		}
+
+		buf, err := gg.GetFinalForm(msg[0], commitsCount)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Errorln(err.Error())
+			return
+		}
+
+		dates, _ := io.ReadAll(buf)
+		log.Println(email[0], string(dates))
 
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<span style=\"color: white;\">NOT IMPLEMENTED :)</span>"))
+		w.Write([]byte("<span style=\"color: white;\">Done, check your email<span>"))
 	})
 
 	http.Handle("/resources/", http.FileServer(http.FS(res)))
 
-	log.Infoln("server started...")
-	log.Fatalln(string(log.ErrorLevel), http.ListenAndServe(":8080", nil))
+	log.Infoln("server started at http://localhost:" + config.Config().Port)
+	log.Fatalln(string(log.ErrorLevel), http.ListenAndServe(":"+config.Config().Port, nil))
 }
