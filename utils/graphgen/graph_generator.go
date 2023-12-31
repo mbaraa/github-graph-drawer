@@ -15,7 +15,7 @@ type ContributionsGraphGenerator interface {
 	// available fonts:
 	// - Font3x3; holds 3x3 glyphs.
 	// - Font3x5; holds 3x5 glyphs.
-	SetFont(gm Font)
+	SetFont(font Font)
 	// GetFinalForm receives a string, and returns an io.Reader, with the resulting graph,
 	// and an occurring errpr,
 	// the reason behind using io.Reader, is that the output is 99.9% of time is a file,
@@ -30,10 +30,12 @@ type ContributionsGraphGenerator interface {
 type GeneratorType int
 
 const (
-	// HtmlGeneratorType makes NewContributionsGraphGenerator return an HtmlContributionsGraphGenerator
+	// HtmlGeneratorType makes NewContributionsGraphGenerator return an htmlContributionsGraphGenerator instance.
 	HtmlGeneratorType GeneratorType = iota
-	// CheatScriptGeneratorType makes NewContributionsGraphGenerator return an CheatScriptContributionsGraphGenerator
+	// CheatScriptGeneratorType makes NewContributionsGraphGenerator return a cheatScriptContributionsGraphGenerator instance.
 	CheatScriptGeneratorType
+	// EmailScheduleGeneratorType makes NewContributionsGraphGenerator return an emailScheduleContributionGraphGenerator instance.
+	EmailScheduleGeneratorType
 )
 
 // NewContributionsGraphGenerator is a factory method that returns a new instance implemnting ContributionsGraphGenerator,
@@ -52,6 +54,11 @@ func NewContributionsGraphGenerator(t GeneratorType, cg *ContributionsGraph) Con
 		}
 	case CheatScriptGeneratorType:
 		return &cheatScriptContributionsGraphGenerator{
+			cg:   cg,
+			font: Font3x5,
+		}
+	case EmailScheduleGeneratorType:
+		return &emailScheduleContributionGraphGenerator{
 			cg:   cg,
 			font: Font3x5,
 		}
@@ -152,4 +159,39 @@ func (c *cheatScriptContributionsGraphGenerator) GetFinalForm(text string, commi
 	}
 
 	return buf, nil
+}
+
+type emailScheduleContributionGraphGenerator struct {
+	cg   *ContributionsGraph
+	font Font
+}
+
+func (e *emailScheduleContributionGraphGenerator) SetFont(font Font) {
+	e.font = font
+}
+
+func (e *emailScheduleContributionGraphGenerator) GetFinalForm(text string, commitsCount int) (io.Reader, error) {
+	// get a usable sentence
+	sentence := e.font.TextToGlyphs(text)
+	// TODO:
+	// handle different fonts' sizes.
+	err := e.cg.DrawSentence(sentence, Point{0, 0})
+	if err != nil {
+		return nil, err
+	}
+
+	gitDates := make([]string, 0)
+	for _, day := range e.cg.Cells() {
+		for _, weekDay := range day {
+			if weekDay.Type == NilCell || weekDay.Type == EmptyCell {
+				continue
+			}
+			gitDates = append(gitDates, string(weekDay.Date))
+		}
+	}
+	slices.Sort(gitDates)
+
+	out := bytes.NewBuffer([]byte{})
+	out.WriteString(strings.Join(gitDates, " "))
+	return out, nil
 }
