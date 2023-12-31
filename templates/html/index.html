@@ -96,7 +96,7 @@
               <select
                 name="font"
                 id="font"
-                class="p-[8px] md:p-[10px] w-[150px] rounded-[5px]"
+                class="p-[8px] md:p-[10px] w-[155px] rounded-[5px]"
               >
                 <option selected disabled>Choose Font</option>
                 <option value="3x5">Single Line (more readable)</option>
@@ -104,13 +104,23 @@
               </select>
 
               <input
-                class="p-[5px] bg-[#121212] text-white w-[150px] rounded-[5px] border-[3px] border-[#EDEDED]"
+                class="p-[5px] bg-[#121212] text-white w-[155px] rounded-[5px] border-[3px] border-[#EDEDED]"
                 type="number"
                 min="1973"
                 max="2100"
                 name="year"
                 placeholder="Commit year"
                 maxlength="4"
+              />
+            </div>
+            <div class="w-[330px] flex justify-center">
+              <input
+                class="block p-[5px] bg-[#121212] text-white w-[350px] rounded-[5px] border-[3px] border-[#EDEDED]"
+                type="number"
+                name="commits-count"
+                min="1"
+                max="300"
+                placeholder="Wanted commits per day"
               />
             </div>
           </div>
