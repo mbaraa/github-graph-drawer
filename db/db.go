@@ -41,17 +41,22 @@ const (
 )
 
 type EmailRequest struct {
-	Email     string                `bson:"email,omitempty"`
-	Token     string                `bson:"token,omitempty"`
-	Operation EmailRequestOperation `bson:"operation,omitempty"`
-	Dates     []string              `bson:"dates,omitempty"`
-	CreatedAt int64                 `bson:"createdAt"`
+	Dates        []string              `bson:"dates,omitempty"`
+	Email        string                `bson:"email,omitempty"`
+	Token        string                `bson:"token,omitempty"`
+	Operation    EmailRequestOperation `bson:"operation,omitempty"`
+	CreatedAt    int64                 `bson:"createdAt"`
+	Message      string                `bson:"message,omitempty"`
+	CommitsCount int                   `bson:"commitsCount,omitempty"`
 }
 
 type EmailScedule struct {
-	Email     string `bson:"email"`
-	Date      string `bson:"date"`
-	CreatedAt int64  `bson:"createdAt"`
+	Email        string `bson:"email,omitempty"`
+	Token        string `bson:"token,omitempty"`
+	Date         string `bson:"date,omitempty"`
+	Message      string `bson:"message,omitempty"`
+	CommitsCount int    `bson:"commitsCount,omitempty"`
+	CreatedAt    int64  `bson:"createdAt"`
 }
 
 func InsertEmailRequest(er EmailRequest) error {
