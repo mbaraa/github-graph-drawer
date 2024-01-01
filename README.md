@@ -16,19 +16,20 @@
 
 **GitHub Graph Drawer** is a tool that helps typing text on your GitHub contributions graph, where it helps you achieve your text goal by sending you emails through out the year for each day that you're supposed to make a log of commits at, or a cheat script that draws the text directly 👀.
 
-*Note: this is a fling project that will die in a while so don't get your hopes up.*
+_Note: this is a fling project that will die in a while so don't get your hopes up._
 
 ## Contributing
 
 IDK, it would be really nice of you to contribute, check the poorly written [CONTRIBUTING.md](/CONTRIBUTING.md) for more info.
 
 ### Roadmap
-- [X] Generator script
-- [X] Web UI
-- [X] SEO
-- [ ] Clear usage instructions
+
+- [x] Generator script
+- [x] Web UI
+- [x] SEO
+- [x] Clear usage instructions
+- [x] Commits count
 - [ ] Mailer
-- [ ] Clear usage instructions
 
 ## Run locally
 
@@ -36,7 +37,7 @@ IDK, it would be really nice of you to contribute, check the poorly written [CON
 
 ```bash
 git clone https://github.com/mbaraa/github-graph-drawer
-``` 
+```
 
 2. Run it with compose.
 
@@ -45,7 +46,6 @@ docker compose up
 ```
 
 3. Visit http://localhost:9999
-   
 4. Don't ask why I chose this weird port.
 
 ### Example
