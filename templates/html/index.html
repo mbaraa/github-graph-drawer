@@ -24,6 +24,7 @@
 
     <link rel="icon" href="/resources/favicon.png" />
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/loading-states.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- GitHub star repo button -->
@@ -53,9 +54,34 @@
         },
       };
     </script>
+
+    <style>
+      .loader {
+        height: 100%;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-width: 6px;
+        border-style: solid;
+        border-color: #dedede;
+        border-top-color: transparent;
+        border-top-width: 2px;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 5px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
 
   <body
+    hx-ext="loading-states"
     style="
       background-color: #121212;
       height: 100dvh;
