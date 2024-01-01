@@ -14,10 +14,10 @@ func init() {
 	_config = config{
 		Port: getEnv("API_PORT", "8080"),
 		Mailer: mailerConf{
-			host:     getEnv("MAILER_HOST", ""),
-			port:     getEnv("MAILER_PORT", ""),
-			user:     getEnv("MAILER_USER", ""),
-			password: getEnv("MAILER_PASSWORD", ""),
+			Host:     getEnv("MAILER_HOST", ""),
+			Port:     getEnv("MAILER_PORT", ""),
+			User:     getEnv("MAILER_USER", ""),
+			Password: getEnv("MAILER_PASSWORD", ""),
 		},
 		DbUri: getEnv("DB_URI", ""),
 	}
@@ -30,10 +30,10 @@ type config struct {
 }
 
 type mailerConf struct {
-	host     string
-	port     string
-	user     string
-	password string
+	Host     string
+	Port     string
+	User     string
+	Password string
 }
 
 // Config returns the API's config :)
