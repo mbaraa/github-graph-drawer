@@ -1,50 +1,41 @@
 version: "3.8"
 
 services:
-  #  github-graph-drawer-db:
-  #    image: "mariadb:10.6"
-  #    container_name: "github-graph-drawer-db"
-  #    restart: "always"
-  #    environment:
-  #      MARIADB_ROOT_PASSWORD: "hellohellobonjourbonjour"
-  #      MARIADB_DATABASE: "github-graph-drawer"
-  #    ports:
-  #      - "3306"
-  #    volumes:
-  #      - db-config:/etc/mysql
-  #      - db-data:/var/lib/mysql
-  #    networks:
-  #      - github-graph-drawer
+  db:
+    container_name: "github-graph-drawer-db"
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: alongtimeagoinagalaxyfarfaraway
+    volumes:
+      - github-graph-drawer-db-data:/etc/mongo
+    networks:
+      - github-graph-drawer
 
-  github-graph-drawer:
+  app:
+    container_name: "github-graph-drawer-app"
     build:
       dockerfile: Dockerfile
       context: .
     image: "github-graph-drawer"
-    # depends_on:
-    # - github-graph-drawer-db
-    # restart: "unless-stopped"
+    depends_on:
+      - db
     restart: "always"
     ports:
       - "9999:8080"
     env_file: ./.env.docker
     stdin_open: true
-#networks:
-# - github-graph-drawer
-#
-#volumes:
-#  db-config:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: ./_database/etc/
-#  db-data:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: ./_database/var/
-#
-#networks:
-#  github-graph-drawer: {}
+    networks:
+      - github-graph-drawer
+
+networks:
+  github-graph-drawer: {}
+
+volumes:
+  github-graph-drawer-db-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_database/
