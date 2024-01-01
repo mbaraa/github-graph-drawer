@@ -4,17 +4,20 @@ import (
 	"crypto/sha256"
 	"embed"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
 	"github-graph-drawer/config"
 	"github-graph-drawer/db"
 	"github-graph-drawer/log"
+	"github-graph-drawer/utils/emailsched"
 	"github-graph-drawer/utils/graphgen"
+
+	"github.com/robfig/cron"
 )
 
 var (
@@ -22,14 +25,42 @@ var (
 	res embed.FS
 )
 
-func foo() {
-	sha256 := sha256.New()
-	sha256.Write([]byte(time.Now().String()))
-	fmt.Println(hex.EncodeToString(sha256.Sum(nil)))
+func main() {
+	scheduleEmails()
+	startServer()
 }
 
-func main() {
-	_ = db.EmailRequest{}
+func scheduleEmails() {
+	cronie := cron.New()
+	err := cronie.AddFunc("0 0 * * * *", func() {
+		emailSchedules, err := db.GetEmailSchedules(time.Now())
+		if err != nil {
+			log.Errorln(err.Error())
+		}
+		for _, es := range emailSchedules {
+			err = emailsched.SendDailyCommitsEmail(es)
+			if err != nil {
+				log.Errorln(err.Error())
+			}
+			err = db.DeleteEmailSchedule(es.Id)
+			if err != nil {
+				log.Errorln(err.Error())
+			}
+		}
+	})
+	if err != nil {
+		log.Errorln(err.Error())
+	}
+	cronie.Start()
+}
+
+func generateToken() string {
+	sha256 := sha256.New()
+	sha256.Write([]byte(time.Now().String()))
+	return hex.EncodeToString(sha256.Sum(nil))
+}
+
+func startServer() {
 	templates := template.Must(template.ParseGlob("./templates/html/*"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/robots.txt" {
@@ -168,11 +199,68 @@ func main() {
 			return
 		}
 
-		dates, _ := io.ReadAll(buf)
-		log.Println(email[0], string(dates))
+		strDates, _ := io.ReadAll(buf)
+		dates := strings.Split(string(strDates), " ")
+		err = emailsched.SendScheduleConfirmationEmail(db.EmailRequest{
+			Dates:        dates,
+			Email:        email[0],
+			Token:        generateToken(),
+			Operation:    db.StartSchedule,
+			CreatedAt:    time.Now().UnixMilli(),
+			Message:      msg[0],
+			CommitsCount: commitsCount,
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Errorln(err.Error())
+			return
+		}
 
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("<span style=\"color: white;\">Done, check your email<span>"))
+	})
+
+	http.HandleFunc("/confirm-email", func(w http.ResponseWriter, r *http.Request) {
+		token := r.URL.Query().Get("token")
+		if len(token) == 0 {
+			log.Warningln("someone tried to confirm their email with an empty token")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		reqs, err := db.GetEmailRequests(token)
+		if err != nil {
+			log.Errorln(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = emailsched.ConfirmDailySchedule(reqs[0])
+		if err != nil {
+			log.Errorln(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	})
+
+	http.HandleFunc("/unsubscribe-email", func(w http.ResponseWriter, r *http.Request) {
+		token := r.URL.Query().Get("token")
+		if len(token) == 0 {
+			log.Warningln("someone tried to unsubscribe their email with an empty token")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		reqs, err := db.GetEmailRequests(token)
+		if err != nil {
+			log.Errorln(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = db.DeleteEmailRequests(reqs[0].Email)
+		if err != nil {
+			log.Errorln(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	})
 
 	http.Handle("/resources/", http.FileServer(http.FS(res)))
