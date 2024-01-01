@@ -16,12 +16,18 @@
           hx-get="/schedule-emails?msg={{ .Msg }}"
           hx-include="[name='email']"
           hx-trigger="submit"
+          data-loading-target="#loading"
+          data-loading-class-remove="hidden"
         >
-          <input
-            type="submit"
-            class="w-full bg-[#FF1744] rounded-[25px] border border-[#EDEDED] hover:bg-[#EDEDED] hover:text-[#FF1744] hover:border-[#FF1744] cursor-pointer text-[#EDEDED] hover:text-[#FF1744] py-[10px] px-[20px] font-bold"
-            value="Email me daily"
-          />
+          <div class="flex justify-center">
+            <input
+              type="submit"
+              class="w-full bg-[#FF1744] rounded-[25px] border border-[#EDEDED] hover:bg-[#EDEDED] hover:text-[#FF1744] hover:border-[#FF1744] cursor-pointer text-[#EDEDED] hover:text-[#FF1744] py-[10px] px-[20px] font-bold"
+              value="Email me daily"
+              data-loading-disable
+            />
+            <div id="loading" class="hidden loader !h-10 !w-10"></div>
+          </div>
           <input
             class="block mt-[20px] p-[5px] bg-[#121212] text-white w-full rounded-[5px] border-[3px] border-[#EDEDED]"
             type="email"

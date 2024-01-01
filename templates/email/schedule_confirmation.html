@@ -1,0 +1,72 @@
+{{ define "schedule_confirmation" }}
+<html lang="en">
+  <body>
+    <div
+      style="
+        font-family: Helvetica, Arial, sans-serif;
+        min-width: 1000px;
+        overflow: auto;
+        line-height: 2;
+      "
+    >
+      <div style="margin: 50px auto; width: 70%; padding: 20px 0">
+        <div style="border-bottom: 1px solid #eee">
+          <a
+            href="https://github-graph-drawer.mbaraa.com"
+            style="
+              font-size: 1.4em;
+              color: #00466a;
+              text-decoration: none;
+              font-weight: 600;
+            "
+            >GitHub Graph Drawer</a
+          >
+        </div>
+        <p style="font-size: 1.1em">Hi,</p>
+        <p>
+          It appears that you have set a serious goal for this year, that is to
+          make <b>{{ .CommitsCount }}</b> commits in some days to achieve your
+          goal text <b>{{ .Msg }}</b> on your GitHub's contributions graph by
+          the end of this year.
+        </p>
+        <p>
+          If you don't know why you've received this email, just ignore it,
+          don't panic, someone must have made a typo.
+        </p>
+        <a
+          href="{{ .ConfirmationLink }}"
+          style="
+            background: #00466a;
+            margin: 0 auto;
+            width: max-content;
+            padding: 10px;
+            color: #fff;
+            border-radius: 4px;
+          "
+        >
+          Confirm Email
+        </a>
+        <br />
+        <br />
+        <p style="font-size: 0.9em">Regards,<br />Baraa Al-Masri</p>
+        <hr style="border: none; border-top: 1px solid #eee" />
+        <div
+          style="
+            float: right;
+            padding: 8px 0;
+            color: #aaa;
+            font-size: 0.8em;
+            line-height: 1;
+            font-weight: 300;
+          "
+        >
+          <p>Baraa from GitHub Graph Drawer</p>
+          <p>
+            <a href="mailto:pub@mbaraa.com">pub@mbaraa.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+{{ end }}
