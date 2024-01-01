@@ -29,7 +29,9 @@ IDK, it would be really nice of you to contribute, check the poorly written [CON
 - [x] SEO
 - [x] Clear usage instructions
 - [x] Commits count
-- [ ] Mailer
+- [x] Mailer
+- [ ] Add more glyphs (symbols and things)
+- [ ] Refactor the code (never gonna happen)
 
 ## Run locally
 
@@ -39,7 +41,13 @@ IDK, it would be really nice of you to contribute, check the poorly written [CON
 git clone https://github.com/mbaraa/github-graph-drawer
 ```
 
-2. Run it with compose.
+2. Create the docker environment file
+
+```bash
+cp .env .env.docker
+```
+
+3. Run it with compose.
 
 ```bash
 docker compose up
