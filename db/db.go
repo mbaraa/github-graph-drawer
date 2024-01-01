@@ -50,7 +50,8 @@ type EmailRequest struct {
 	CommitsCount int                   `bson:"commitsCount,omitempty"`
 }
 
-type EmailScedule struct {
+type EmailSchedule struct {
+	Id           string `bson:"id,omitempty"`
 	Email        string `bson:"email,omitempty"`
 	Token        string `bson:"token,omitempty"`
 	Date         string `bson:"date,omitempty"`
@@ -70,8 +71,8 @@ func InsertEmailRequest(er EmailRequest) error {
 	return nil
 }
 
-func GetEmailRequests(email string) (ers []EmailRequest, err error) {
-	cursor, err := emailRequestsColl.Find(ctx, bson.D{{"email", bson.D{{"$eq", email}}}})
+func GetEmailRequests(token string) (ers []EmailRequest, err error) {
+	cursor, err := emailRequestsColl.Find(ctx, bson.D{{"token", bson.D{{"$eq", token}}}})
 	if err != nil {
 		return
 	}
@@ -103,10 +104,14 @@ func DeleteEmailRequests(email string) error {
 	if err != nil {
 		return err
 	}
+	_, err = emailScheduleColl.DeleteMany(ctx, bson.D{{"email", bson.D{{"$eq", email}}}})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func InsertEmailSchedule(es EmailScedule) error {
+func InsertEmailSchedule(es EmailSchedule) error {
 	if es.CreatedAt == 0 || es.CreatedAt < time.Now().Unix() {
 		return ErrInvalidCreatedAtDate
 	}
@@ -117,14 +122,14 @@ func InsertEmailSchedule(es EmailScedule) error {
 	return nil
 }
 
-func GetEmailSchedules(date time.Time) (ess []EmailScedule, err error) {
+func GetEmailSchedules(date time.Time) (ess []EmailSchedule, err error) {
 	cursor, err := emailScheduleColl.Find(ctx, bson.D{{"createdAt", bson.D{{"$lte", date.Unix()}}}})
 	if err != nil {
 		return
 	}
 
 	for cursor.Next(ctx) {
-		var result EmailScedule
+		var result EmailSchedule
 		if err := cursor.Decode(&result); err != nil {
 			log.Errorln(err)
 			continue
@@ -137,4 +142,9 @@ func GetEmailSchedules(date time.Time) (ess []EmailScedule, err error) {
 	}
 
 	return
+}
+
+func DeleteEmailSchedule(id string) error {
+	_, err := emailScheduleColl.DeleteOne(ctx, bson.D{{"id", bson.D{{"$eq", id}}}})
+	return err
 }
