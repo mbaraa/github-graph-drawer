@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"time"
 )
 
 type pagesApi struct {
@@ -45,7 +46,10 @@ func (p *pagesApi) handleResources(w http.ResponseWriter, r *http.Request) {
 
 func (p *pagesApi) handleHomePage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := p.templates.ExecuteTemplate(w, "index", nil); err != nil {
+	if err := p.templates.ExecuteTemplate(w, "index", map[string]any{
+		"CurrentYear":         time.Now().Year(),
+		"DefaultCommitsCount": 80,
+	}); err != nil {
 		log.Errorln(err.Error())
 		return
 	}
