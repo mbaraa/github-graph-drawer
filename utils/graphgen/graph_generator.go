@@ -96,6 +96,11 @@ func (h *htmlContributionsGraphGenerator) GetFinalForm(text string, commitsCount
 		}
 	}
 
+	font := "3x5"
+	if len(h.font['A']) == 3 {
+		font = "3x3"
+	}
+
 	// FIX:
 	// fix this illegal floating template instance.
 	tmpl := template.Must(template.ParseGlob("./templates/html/*"))
@@ -104,6 +109,8 @@ func (h *htmlContributionsGraphGenerator) GetFinalForm(text string, commitsCount
 		"Cells":        classes,
 		"Msg":          text,
 		"CommitsCount": commitsCount,
+		"Font":         font,
+		"Year":         h.cg.Cells()[0][1].Date[:4],
 	})
 	if err != nil {
 		return nil, err
