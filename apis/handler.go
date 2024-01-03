@@ -33,7 +33,7 @@ type handler struct {
 }
 
 func (h *handler) Prefix() string {
-	return h.prefix + "/"
+	return h.prefix
 }
 
 func (h *handler) Endpoints() Endpoints {
@@ -41,7 +41,8 @@ func (h *handler) Endpoints() Endpoints {
 }
 
 func (h *handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	endpointPath := strings.TrimPrefix(req.URL.Path, h.Prefix()[:len(h.Prefix())-1])
+	prefix := h.prefix + "/"
+	endpointPath := strings.TrimPrefix(req.URL.Path, prefix[:len(prefix)-1])
 	if strings.Contains(endpointPath, "/") {
 		endpointPath = endpointPath[:strings.Index(endpointPath, "/")]
 	}
