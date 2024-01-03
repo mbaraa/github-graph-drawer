@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
+	"github-graph-drawer/apis"
 	"github-graph-drawer/config"
 	"github-graph-drawer/db"
 	"github-graph-drawer/log"
@@ -26,8 +26,17 @@ var (
 )
 
 func main() {
-	scheduleEmails()
-	startServer()
+	// scheduleEmails()
+	// startServer()
+	for _, api := range []apis.IHandler{
+		apis.NewPagesApi(),
+		apis.NewGraphGeneratorApi(),
+	} {
+		log.Infof("mounting the api %s\n", api.Prefix())
+		http.Handle(api.Prefix(), api)
+	}
+
+	http.ListenAndServe(":8080", nil)
 }
 
 func scheduleEmails() {
@@ -61,101 +70,6 @@ func generateToken() string {
 }
 
 func startServer() {
-	templates := template.Must(template.ParseGlob("./templates/html/*"))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/robots.txt" {
-			tmpl, _ := template.ParseFS(res, "resources/robots.txt")
-			w.Header().Set("Content-Type", "text/plain")
-			_ = tmpl.Execute(w, nil)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html")
-		if err := templates.ExecuteTemplate(w, "index", nil); err != nil {
-			log.Errorln(err.Error())
-			return
-		}
-	})
-
-	http.HandleFunc("/contribution-graph", func(w http.ResponseWriter, r *http.Request) {
-		msg, exists := r.URL.Query()["msg"]
-		if !exists {
-			log.Warningln("someone sent a bad request...")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		font := r.URL.Query().Get("font")
-		year := time.Now().Year()
-		if parsedYear, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
-			year = parsedYear
-		}
-		commitsCount := 80
-		if parsedCommitsCount, err := strconv.Atoi(r.URL.Query().Get("commits-count")); err == nil {
-			commitsCount = parsedCommitsCount
-		}
-
-		gg := graphgen.NewContributionsGraphGenerator(
-			graphgen.HtmlGeneratorType,
-			graphgen.ContributionsGraph{}.Init(year),
-		)
-
-		switch font {
-		case "3x3":
-			gg.SetFont(graphgen.Font3x3)
-		case "3x5":
-			gg.SetFont(graphgen.Font3x5)
-		}
-
-		buf, err := gg.GetFinalForm(msg[0], commitsCount)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Errorln(err.Error())
-			return
-		}
-
-		w.Header().Set("Content-Type", "text/html")
-		_, _ = io.Copy(w, buf)
-	})
-
-	http.HandleFunc("/generate-script", func(w http.ResponseWriter, r *http.Request) {
-		msg, exists := r.URL.Query()["msg"]
-		if !exists {
-			log.Warningln("someone sent a bad request...")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		font := r.URL.Query().Get("font")
-		year := time.Now().Year()
-		if parsedYear, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
-			year = parsedYear
-		}
-		commitsCount := 80
-		if parsedCommitsCount, err := strconv.Atoi(r.URL.Query().Get("commits-count")); err == nil {
-			commitsCount = parsedCommitsCount
-		}
-
-		gg := graphgen.NewContributionsGraphGenerator(
-			graphgen.CheatScriptGeneratorType,
-			graphgen.ContributionsGraph{}.Init(year),
-		)
-
-		switch font {
-		case "3x3":
-			gg.SetFont(graphgen.Font3x3)
-		case "3x5":
-			gg.SetFont(graphgen.Font3x5)
-		}
-
-		buf, err := gg.GetFinalForm(msg[0], commitsCount)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Errorln(err.Error())
-			return
-		}
-
-		w.Header().Set("Content-Type", "text/plain")
-		_, _ = io.Copy(w, buf)
-	})
-
 	http.HandleFunc("/schedule-emails", func(w http.ResponseWriter, r *http.Request) {
 		msg, exists := r.URL.Query()["msg"]
 		if !exists {
@@ -262,8 +176,6 @@ func startServer() {
 			return
 		}
 	})
-
-	http.Handle("/resources/", http.FileServer(http.FS(res)))
 
 	log.Infoln("server started at http://localhost:" + config.Config().Port)
 	log.Fatalln(string(log.ErrorLevel), http.ListenAndServe(":"+config.Config().Port, nil))
