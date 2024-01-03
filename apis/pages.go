@@ -14,7 +14,7 @@ type pagesApi struct {
 	resDir    fs.FS
 }
 
-func NewPagesApi() http.Handler {
+func NewPagesApi() IHandler {
 	p := &pagesApi{
 		templates: template.Must(template.ParseGlob("./templates/html/*")),
 		resDir:    os.DirFS("./resources"),
