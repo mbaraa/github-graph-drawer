@@ -153,6 +153,7 @@ func (c *cheatScriptContributionsGraphGenerator) GetFinalForm(text string, commi
 	err = tmpl.ExecuteTemplate(buf, "generate_commits_script", map[string]any{
 		"Dates":        strings.Join(gitDates, " "),
 		"CommitsCount": commitsCount,
+		"Message":      text,
 	})
 	if err != nil {
 		return nil, err
