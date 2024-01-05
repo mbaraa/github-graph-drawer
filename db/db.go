@@ -81,6 +81,19 @@ func InsertDailySchedule(ds DailySchedule) error {
 }
 
 // ok
+func InsertDailySchedules(dss []DailySchedule) error {
+	documents := make([]any, 0)
+	for _, ds := range dss {
+		documents = append(documents, ds)
+	}
+	_, err := dailyScheduleColl.InsertMany(ctx, documents)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ok
 func GetScheduleRequestByEmailAndToken(token string) (er ScheduleRequest, err error) {
 	filter := bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}}
 	result := scheduleRequestColl.FindOne(ctx, filter)

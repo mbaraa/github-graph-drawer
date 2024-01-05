@@ -31,11 +31,12 @@ func ConfirmEmail(token string) error {
 	if err != nil {
 		return err
 	}
-	for _, date := range scheduleRequest.Dates {
-		d, _ := time.Parse("2006-01-02", date)
-		err := db.InsertDailySchedule(db.DailySchedule{
+	dailySchedules := make([]db.DailySchedule, len(scheduleRequest.Dates))
+	for i, date := range scheduleRequest.Dates {
+		d, _ := time.Parse("2006-01-02T15:04:05", date)
+		dailySchedules[i] = db.DailySchedule{
 			Email:            scheduleRequest.Email,
-			Date:             date,
+			Date:             d.String(),
 			CancelationToken: scheduleRequest.ConfirmationToken,
 			Content: db.EmailContent{
 				CommitsCount: scheduleRequest.Content.CommitsCount,
@@ -43,10 +44,14 @@ func ConfirmEmail(token string) error {
 				Year:         scheduleRequest.Content.Year,
 			},
 			CreatedAt: d.Unix(),
-		})
+		}
 		if err != nil {
 			return err
 		}
+	}
+	err = db.InsertDailySchedules(dailySchedules)
+	if err != nil {
+		return err
 	}
 	return db.DeleteScheduleRequestByEmailAndToken(scheduleRequest.Email, token)
 }
