@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github-graph-drawer/config"
 	"github-graph-drawer/log"
-	"slices"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,10 +13,10 @@ import (
 )
 
 var (
-	ctx               context.Context
-	client            *mongo.Client
-	emailRequestsColl *mongo.Collection
-	emailScheduleColl *mongo.Collection
+	ctx                 context.Context
+	client              *mongo.Client
+	scheduleRequestColl *mongo.Collection
+	dailyScheduleColl   *mongo.Collection
 
 	ErrInvalidCreatedAtDate = errors.New("invalid created at date")
 )
@@ -29,122 +28,120 @@ func init() {
 	if err != nil {
 		log.Errorln(err.Error())
 	}
-	emailRequestsColl = client.Database("github-graph-drawer-db").Collection("emailRequests")
-	emailScheduleColl = client.Database("github-graph-drawer-db").Collection("emailSchedule")
+	scheduleRequestColl = client.Database("github-graph-drawer-db").Collection("ScheduleRequest")
+	dailyScheduleColl = client.Database("github-graph-drawer-db").Collection("DailySchedule")
 }
 
-type EmailRequestOperation string
-
-const (
-	StartSchedule EmailRequestOperation = "start"
-	StopSchedule  EmailRequestOperation = "stop"
-)
-
-type EmailRequest struct {
-	Dates        []string              `bson:"dates,omitempty"`
-	Email        string                `bson:"email,omitempty"`
-	Token        string                `bson:"token,omitempty"`
-	Operation    EmailRequestOperation `bson:"operation,omitempty"`
-	CreatedAt    int64                 `bson:"createdAt"`
-	Message      string                `bson:"message,omitempty"`
-	CommitsCount int                   `bson:"commitsCount,omitempty"`
-}
-
-type EmailSchedule struct {
-	Id           string `bson:"id,omitempty"`
-	Email        string `bson:"email,omitempty"`
-	Token        string `bson:"token,omitempty"`
-	Date         string `bson:"date,omitempty"`
-	Message      string `bson:"message,omitempty"`
+type EmailContent struct {
 	CommitsCount int    `bson:"commitsCount,omitempty"`
-	CreatedAt    int64  `bson:"createdAt"`
+	Message      string `bson:"message,omitempty"`
+	Year         string `bson:"year"`
 }
 
-func InsertEmailRequest(er EmailRequest) error {
-	if er.CreatedAt == 0 || er.CreatedAt < time.Now().Unix() {
+type ScheduleRequest struct {
+	Email             string       `bson:"email,omitempty"`
+	Dates             []string     `bson:"dates,omitempty"`
+	ConfirmationToken string       `bson:"confirmationToken,omitempty"`
+	Content           EmailContent `bson:"content"`
+	CreatedAt         int64        `bson:"createdAt"`
+}
+
+type DailySchedule struct {
+	Id               string       `bson:"_id"`
+	Email            string       `bson:"email,omitempty"`
+	Date             string       `bson:"date,omitempty"`
+	CancelationToken string       `bson:"cancelationToken,omitempty"`
+	Content          EmailContent `bson:"content"`
+	CreatedAt        int64        `bson:"createdAt"`
+}
+
+// ok
+func InsertScheduleRequest(sr ScheduleRequest) error {
+	if sr.CreatedAt == 0 || sr.CreatedAt < time.Now().Unix() {
 		return ErrInvalidCreatedAtDate
 	}
-	_, err := emailRequestsColl.InsertOne(ctx, er)
+	_, err := scheduleRequestColl.InsertOne(ctx, sr)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetEmailRequests(token string) (ers []EmailRequest, err error) {
-	cursor, err := emailRequestsColl.Find(ctx, bson.D{{"token", bson.D{{"$eq", token}}}})
+// ok
+func InsertDailySchedule(ds DailySchedule) error {
+	if ds.CreatedAt == 0 || ds.CreatedAt < time.Now().Unix() {
+		return ErrInvalidCreatedAtDate
+	}
+	_, err := dailyScheduleColl.InsertOne(ctx, ds)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ok
+func GetScheduleRequestByEmailAndToken(email, token string) (er ScheduleRequest, err error) {
+	filter := bson.D{{Key: "$and", Value: bson.A{
+		bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}},
+		bson.D{{Key: "email", Value: bson.D{{Key: "$eq", Value: email}}}},
+	}}}
+	result := scheduleRequestColl.FindOne(ctx, filter)
+	if result.Err() != nil {
+		return
+	}
+	err = result.Decode(&er)
 	if err != nil {
 		return
 	}
+	return
+}
 
+// ok
+func GetDailySchedulesByTimestamp(time time.Time) (dss []DailySchedule, err error) {
+	cursor, err := dailyScheduleColl.Find(ctx, bson.D{
+		{Key: "createdAt", Value: bson.D{{Key: "$lte", Value: time.Unix()}}},
+	})
+	if err != nil {
+		return
+	}
 	for cursor.Next(ctx) {
-		var result EmailRequest
+		var result DailySchedule
 		if err := cursor.Decode(&result); err != nil {
 			log.Errorln(err)
 			continue
 		}
-		ers = append(ers, result)
+		dss = append(dss, result)
 	}
 	if err := cursor.Err(); err != nil {
 		log.Errorln(err)
 		return nil, err
 	}
-
-	if ers != nil {
-		slices.SortFunc(ers, func(a, b EmailRequest) int {
-			return int(a.CreatedAt) - int(b.CreatedAt)
-		})
-	}
-
 	return
 }
 
-func DeleteEmailRequests(email string) error {
-	_, err := emailRequestsColl.DeleteMany(ctx, bson.D{{"email", bson.D{{"$eq", email}}}})
-	if err != nil {
-		return err
-	}
-	_, err = emailScheduleColl.DeleteMany(ctx, bson.D{{"email", bson.D{{"$eq", email}}}})
-	if err != nil {
-		return err
-	}
-	return nil
+// ok
+func DeleteScheduleRequestByEmailAndToken(email, token string) error {
+	filter := bson.D{{Key: "$and", Value: bson.A{
+		bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}},
+		bson.D{{Key: "email", Value: bson.D{{Key: "$eq", Value: email}}}},
+	}}}
+	_, err := scheduleRequestColl.DeleteOne(ctx, filter)
+	return err
 }
 
-func InsertEmailSchedule(es EmailSchedule) error {
-	if es.CreatedAt == 0 || es.CreatedAt < time.Now().Unix() {
-		return ErrInvalidCreatedAtDate
-	}
-	_, err := emailScheduleColl.InsertOne(ctx, es)
-	if err != nil {
-		return err
-	}
-	return nil
+// ok
+func DeleteDailyScheduleById(id string) error {
+	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$eq", Value: id}}}}
+	_, err := dailyScheduleColl.DeleteOne(ctx, filter)
+	return err
 }
 
-func GetEmailSchedules(date time.Time) (ess []EmailSchedule, err error) {
-	cursor, err := emailScheduleColl.Find(ctx, bson.D{{"createdAt", bson.D{{"$lte", date.Unix()}}}})
-	if err != nil {
-		return
-	}
-
-	for cursor.Next(ctx) {
-		var result EmailSchedule
-		if err := cursor.Decode(&result); err != nil {
-			log.Errorln(err)
-			continue
-		}
-		ess = append(ess, result)
-	}
-	if err := cursor.Err(); err != nil {
-		log.Errorln(err)
-		return nil, err
-	}
-
-	return
-}
-
-func DeleteEmailSchedule(id string) error {
-	_, err := emailScheduleColl.DeleteOne(ctx, bson.D{{"id", bson.D{{"$eq", id}}}})
+// ok
+func DeleteDailySchedulesByEmailAndToken(email, token string) error {
+	filter := bson.D{{Key: "$and", Value: bson.A{
+		bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}},
+		bson.D{{Key: "email", Value: bson.D{{Key: "$eq", Value: email}}}},
+	}}}
+	_, err := dailyScheduleColl.DeleteMany(ctx, filter)
 	return err
 }
