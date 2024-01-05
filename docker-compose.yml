@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: alongtimeagoinagalaxyfarfaraway
     volumes:
-      - github-graph-drawer-db-data:/etc/mongo
+      - github-graph-drawer-db-data:/data/db
     networks:
       - github-graph-drawer
 
