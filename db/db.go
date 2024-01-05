@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -57,7 +58,7 @@ type DailySchedule struct {
 
 // ok
 func InsertScheduleRequest(sr ScheduleRequest) error {
-	if sr.CreatedAt == 0 || sr.CreatedAt < time.Now().Unix() {
+	if sr.CreatedAt == 0 {
 		return ErrInvalidCreatedAtDate
 	}
 	_, err := scheduleRequestColl.InsertOne(ctx, sr)
@@ -69,7 +70,7 @@ func InsertScheduleRequest(sr ScheduleRequest) error {
 
 // ok
 func InsertDailySchedule(ds DailySchedule) error {
-	if ds.CreatedAt == 0 || ds.CreatedAt < time.Now().Unix() {
+	if ds.CreatedAt == 0 {
 		return ErrInvalidCreatedAtDate
 	}
 	_, err := dailyScheduleColl.InsertOne(ctx, ds)
@@ -94,9 +95,9 @@ func GetScheduleRequestByEmailAndToken(token string) (er ScheduleRequest, err er
 }
 
 // ok
-func GetDailySchedulesByTimestamp(time time.Time) (dss []DailySchedule, err error) {
+func GetDailySchedulesByTimestamp(t time.Time) (dss []DailySchedule, err error) {
 	cursor, err := dailyScheduleColl.Find(ctx, bson.D{
-		{Key: "createdAt", Value: bson.D{{Key: "$lte", Value: time.Unix()}}},
+		{Key: "createdAt", Value: bson.D{{Key: "$lte", Value: t.Unix()}}},
 	})
 	if err != nil {
 		return
@@ -114,6 +115,19 @@ func GetDailySchedulesByTimestamp(time time.Time) (dss []DailySchedule, err erro
 		return nil, err
 	}
 	return
+	currentDayEmails := make([]DailySchedule, 0)
+	for _, ds := range dss {
+		iDidntHaveANameForThis, err := time.Parse("2006-01-02", ds.Date)
+		if err != nil {
+			continue
+		}
+		if iDidntHaveANameForThis.Day() == t.Day() &&
+			iDidntHaveANameForThis.Month() == t.Month() &&
+			iDidntHaveANameForThis.Year() == t.Year() {
+			currentDayEmails = append(currentDayEmails, ds)
+		}
+	}
+	return currentDayEmails, nil
 }
 
 // ok
@@ -128,8 +142,12 @@ func DeleteScheduleRequestByEmailAndToken(email, token string) error {
 
 // ok
 func DeleteDailyScheduleById(id string) error {
-	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$eq", Value: id}}}}
-	_, err := dailyScheduleColl.DeleteOne(ctx, filter)
+	primitiveId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{Key: "_id", Value: bson.D{{Key: "$eq", Value: primitiveId}}}}
+	_, err = dailyScheduleColl.DeleteOne(ctx, filter)
 	return err
 }
 

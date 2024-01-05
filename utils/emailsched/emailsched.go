@@ -19,6 +19,10 @@ func SendScheduleConfirmationEmail(sr db.ScheduleRequest) error {
 	if err != nil {
 		return err
 	}
+	err = db.InsertScheduleRequest(sr)
+	if err != nil {
+		return err
+	}
 	return sendEmail("GitHub Graph Drawer Schedule Confirmation", buf.String(), sr.Email)
 }
 
