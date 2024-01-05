@@ -80,11 +80,8 @@ func InsertDailySchedule(ds DailySchedule) error {
 }
 
 // ok
-func GetScheduleRequestByEmailAndToken(email, token string) (er ScheduleRequest, err error) {
-	filter := bson.D{{Key: "$and", Value: bson.A{
-		bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}},
-		bson.D{{Key: "email", Value: bson.D{{Key: "$eq", Value: email}}}},
-	}}}
+func GetScheduleRequestByEmailAndToken(token string) (er ScheduleRequest, err error) {
+	filter := bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}}
 	result := scheduleRequestColl.FindOne(ctx, filter)
 	if result.Err() != nil {
 		return
