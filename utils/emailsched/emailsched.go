@@ -36,7 +36,7 @@ func ConfirmEmail(token string) error {
 		err := db.InsertDailySchedule(db.DailySchedule{
 			Email:            scheduleRequest.Email,
 			Date:             date,
-			CancelationToken: generateToken(),
+			CancelationToken: scheduleRequest.ConfirmationToken,
 			Content: db.EmailContent{
 				CommitsCount: scheduleRequest.Content.CommitsCount,
 				Message:      scheduleRequest.Content.Message,

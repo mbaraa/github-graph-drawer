@@ -19,7 +19,7 @@ func main() {
 func scheduleEmails() {
 	cronie := cron.New()
 	err := cronie.AddFunc("0 0 * * * *", func() {
-		log.Infoln("Sending emails")
+		log.Infoln("Sending emails...")
 		sent, total, err := emailsched.SendDailySchedulesEmail(time.Now())
 		if err != nil {
 			log.Errorln(err)
@@ -27,7 +27,7 @@ func scheduleEmails() {
 		if sent != total {
 			log.Warningf("%d of the %d emails weren't sent\n", (total - sent), total)
 		}
-		log.Infoln("Done sending emails...")
+		log.Infoln("Done sending emails ✓")
 	})
 	if err != nil {
 		log.Errorln(err.Error())
