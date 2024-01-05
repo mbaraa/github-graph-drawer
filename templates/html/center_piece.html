@@ -13,7 +13,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3">
         <form
           class="w-[250px]"
-          hx-get="/schedule-emails?msg={{ .Msg }}&commits-count={{ .CommitsCount }}&font={{ .Font }}&year={{ .Year }}"
+          hx-get="/email/schedule?msg={{ .Msg }}&commits-count={{ .CommitsCount }}&font={{ .Font }}&year={{ .Year }}"
           hx-include="[name='email']"
           hx-trigger="submit"
           data-loading-target="#loading"
