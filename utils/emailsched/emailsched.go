@@ -47,8 +47,8 @@ func ConfirmEmail(token string) error {
 	return db.DeleteScheduleRequestByEmailAndToken(scheduleRequest.Email, token)
 }
 
-func Unsubscribe(email, token string) error {
-	return db.DeleteDailySchedulesByEmailAndToken(email, token)
+func Unsubscribe(token string) error {
+	return db.DeleteDailySchedulesByEmailAndToken(token)
 }
 
 func SendDailySchedulesEmail(time time.Time) (sent, total int, err error) {

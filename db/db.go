@@ -134,11 +134,8 @@ func DeleteDailyScheduleById(id string) error {
 }
 
 // ok
-func DeleteDailySchedulesByEmailAndToken(email, token string) error {
-	filter := bson.D{{Key: "$and", Value: bson.A{
-		bson.D{{Key: "confirmationToken", Value: bson.D{{Key: "$eq", Value: token}}}},
-		bson.D{{Key: "email", Value: bson.D{{Key: "$eq", Value: email}}}},
-	}}}
+func DeleteDailySchedulesByEmailAndToken(token string) error {
+	filter := bson.D{{Key: "cancelationToken", Value: bson.D{{Key: "$eq", Value: token}}}}
 	_, err := dailyScheduleColl.DeleteMany(ctx, filter)
 	return err
 }
