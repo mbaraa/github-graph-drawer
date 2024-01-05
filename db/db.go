@@ -47,7 +47,7 @@ type ScheduleRequest struct {
 }
 
 type DailySchedule struct {
-	Id               string       `bson:"_id"`
+	Id               string       `bson:"_id,omitempty"`
 	Email            string       `bson:"email,omitempty"`
 	Date             string       `bson:"date,omitempty"`
 	CancelationToken string       `bson:"cancelationToken,omitempty"`
