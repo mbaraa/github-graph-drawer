@@ -129,7 +129,7 @@ func GetDailySchedulesByTimestamp(t time.Time) (dss []DailySchedule, err error) 
 	}
 	currentDayEmails := make([]DailySchedule, 0)
 	for _, ds := range dss {
-		iDidntHaveANameForThis, err := time.Parse("2006-01-02", ds.Date)
+		iDidntHaveANameForThis := time.Unix(ds.CreatedAt, 0)
 		if err != nil {
 			continue
 		}

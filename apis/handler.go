@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"github-graph-drawer/log"
 	"net/http"
 	"strings"
 )
@@ -41,6 +42,7 @@ func (h *handler) Endpoints() Endpoints {
 }
 
 func (h *handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	log.Infof("%s %s?%s", req.Method, req.URL.Path, req.URL.Query().Encode())
 	prefix := h.prefix + "/"
 	endpointPath := strings.TrimPrefix(req.URL.Path, prefix[:len(prefix)-1])
 	if strings.Contains(endpointPath, "/") {
